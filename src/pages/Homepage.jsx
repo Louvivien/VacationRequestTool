@@ -1,84 +1,42 @@
-import {
-  Badge,
-  chakra,
-  Code,
-  Heading,
-  List,
-  ListItem,
-  OrderedList,
-} from '@chakra-ui/react'
-import React from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Layout } from '../components/Layout'
-import { useAuth } from '../contexts/AuthContext'
+import React from 'react';
+import { Container, Text, Heading, ListItem, OrderedList } from '@chakra-ui/react';
+import { Layout } from '../components/Layout';
+import { useAuth } from '../contexts/AuthContext';
+import CustomerOrdersList from '../components/CustomerOrdersList';
+import OrderForm from '../components/OrderForm';
 
 export default function Homepage() {
+  const { currentUser } = useAuth();
+
   return (
     <Layout>
-      <Heading>Home page</Heading>
-      {/* <Text my={6}>{currentUser?.email}</Text> */}
+      {currentUser ? (
+        <>
+              <Container maxW='container.lg' py={4}>
+        <Heading as="h6">Your Orders</Heading>
+        <Text mb={4}>List of all orders you've submitted.</Text>
+        <CustomerOrdersList />
+      </Container>
+          <br></br>
+          <Container maxW='container.lg' py={4}>
+        <Heading as="h6">Submit an Order</Heading>
+        <Text mb={4}>Enter the details of the order you want to submit.</Text>
+        <OrderForm />
+      </Container>
+        </>
+      ) : (
+        <>
+          <Heading>
+            Customer account
+          </Heading>
+          <OrderedList fontSize='1xl' my={4}>
+            <ListItem>Find your orders</ListItem>
+            <ListItem>Renew your orders</ListItem>
+          </OrderedList>
+        </>
+      )}
 
-      <Heading>
-        Firebase Authentication
-        <chakra.span
-          fontWeight='black'
-          fontStyle='italic'
-          fontSize='9xl'
-          mx={2}
-        >
-          v9
-        </chakra.span>
-        <Badge
-          fontWeight='black'
-          fontSize='4xl'
-          mx={2}
-          px={2}
-          colorScheme='green'
-        >
-          NEW API
-        </Badge>
-      </Heading>
-      <OrderedList fontSize='3xl' my={4}>
-        <ListItem>Email password authentication (Register/Login)</ListItem>
-        <ListItem>Google Sign in</ListItem>
-        <ListItem>Forgot Password</ListItem>
-        <ListItem>Custom Reset password page</ListItem>
-        <ListItem>Protected routes</ListItem>
-        <ListItem>
-          <Code fontSize='inherit'> Redirect TO</Code> or Back (keeping the
-          state)
-        </ListItem>
-        <ListItem>
-          custom Auth Hook <Code fontSize='3xl'>useAuth()</Code>
-        </ListItem>
-        <ListItem>Loading indicators while sign-in/up</ListItem>
-        <ListItem>
-          Dark Mode enabled template using
-          <Badge
-            fontSize='inherit'
-            colorScheme='teal'
-            mx={2}
-            textTransform='capitalize'
-            borderRadius='md'
-          >
-            Chakra UI
-          </Badge>
-        </ListItem>
-      </OrderedList>
-      <Heading size='md' mt={8}>
-        Some other links (only for reference):
-      </Heading>
-      <List>
-        <ListItem>
-          <Link to='/reset-password'>reset page</Link>
-        </ListItem>
-        <ListItem>
-          <Link to='/forgot-password'>forgot page</Link>
-        </ListItem>
-        <ListItem>
-          <Link to='/test'>test page</Link>
-        </ListItem>
-      </List>
+
     </Layout>
-  )
+  );
 }

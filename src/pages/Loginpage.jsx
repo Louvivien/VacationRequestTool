@@ -39,7 +39,7 @@ export default function Loginpage() {
 
   function handleRedirectToOrBack() {
     // console.log(location?.state)
-    history.replace(location.state?.from ?? '/profile')
+    history.replace(location.state?.from ?? '/')
     // if (location.state) {
     //   history.replace(location.state?.from)
     // } else {

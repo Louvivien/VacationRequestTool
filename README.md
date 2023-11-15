@@ -8,6 +8,17 @@ You can use this template as a starting point for any application that needs aut
 
 The template is based on [ChakraUI](https://chakra-ui.com/) (incl. **Dark Mode**), though you can use any UI library you like but you need to do the relevant changes and keep the code related to firebase authentication - **the logic remains the same in any UI**.
 
+## Prerequisite
+
+Node version 16
+
+brew install node@16
+
+export NODE_OPTIONS=--openssl-legacy-provider
+
+
+
+
 ## Available Scripts
 
 In the project directory, you can run:

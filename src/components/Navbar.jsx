@@ -1,3 +1,6 @@
+// /Users/vivien/Documents/Entreprisedufutur/src/components/Navbar.jsx
+
+import React from 'react';
 import {
   Box,
   HStack,
@@ -5,16 +8,17 @@ import {
   Spacer,
   useColorMode,
   useColorModeValue,
-} from '@chakra-ui/react'
-import React from 'react'
-import { FaMoon, FaSun } from 'react-icons/fa'
-import { useAuth } from '../contexts/AuthContext'
-import Navlink from './Navlink'
+  Image,
+} from '@chakra-ui/react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { FaMoon, FaSun } from 'react-icons/fa';
+import { useAuth } from '../contexts/AuthContext';
+import Navlink from './Navlink';
+import UserMenu from './UserMenu'; // Import the UserMenu component
 
 export function Navbar() {
-  const { toggleColorMode } = useColorMode()
-  // const { logout, currentUser } = useAuth()
-  const { logout, currentUser } = useAuth()
+  const { toggleColorMode } = useColorMode();
+  const { logout, currentUser } = useAuth();
 
   return (
     <Box
@@ -23,24 +27,21 @@ export function Navbar() {
       mb={4}
       py={4}
     >
-      <HStack
-        justifyContent='flex-end'
-        maxW='container.lg'
-        mx='auto'
-        spacing={4}
-      >
-        <Navlink to='/' name='Firbase Authentication' size='lg' />
+      <HStack justifyContent='flex-end' maxW='container.lg' mx='auto' spacing={4}>
+      <Link to='/'>
+        <Image src='/logo-margaron.png' alt='Customer account' />
+        </Link>
         <Spacer />
         {!currentUser && <Navlink to='/login' name='Login' />}
         {!currentUser && <Navlink to='/register' name='Register' />}
-        {currentUser && <Navlink to='/profile' name='Profile' />}
+        {currentUser && <UserMenu />} {/* Use the UserMenu component here */}
         {currentUser && (
           <Navlink
             to='/logout'
             name='Logout'
-            onClick={async e => {
-              e.preventDefault()
-              await logout()
+            onClick={async (e) => {
+              e.preventDefault();
+              await logout();
             }}
           />
         )}
@@ -52,5 +53,5 @@ export function Navbar() {
         />
       </HStack>
     </Box>
-  )
+  );
 }
