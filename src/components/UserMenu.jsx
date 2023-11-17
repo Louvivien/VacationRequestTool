@@ -14,7 +14,7 @@ const UserMenu = () => {
       <MenuList>
         <MenuItem as={Link} to="/orders">Mes commandes</MenuItem>
         <MenuItem as={Link} to="/order">Créer une commande</MenuItem>
-        <MenuItem as={Link} to="/profile">Mon profile</MenuItem>
+        <MenuItem as={Link} to="/profile">Mon profil</MenuItem>
         <MenuItem as={Link} to="/reset-password">Changer de mot de passe</MenuItem>
         <MenuItem as={Link} to="/forgot-password">Mot de passe oublié</MenuItem>
         {/* <MenuItem as={Link} to="/test">Test Page</MenuItem> */}
