@@ -13,25 +13,25 @@ export default function Homepage() {
       {currentUser ? (
         <>
               <Container maxW='container.lg' py={4}>
-        <Heading as="h6">Your Orders</Heading>
-        <Text mb={4}>List of all orders you've submitted.</Text>
+        <Heading as="h6">Vos commandes</Heading>
+        <Text mb={4}>Liste de toutes les commandes que vous avez passé</Text>
         <CustomerOrdersList />
       </Container>
           <br></br>
           <Container maxW='container.lg' py={4}>
-        <Heading as="h6">Submit an Order</Heading>
-        <Text mb={4}>Enter the details of the order you want to submit.</Text>
+        <Heading as="h6">Passer une nouvelle commande</Heading>
+        <Text mb={4}>Saisir le détail de la commande que vous souhaitez passer.</Text>
         <OrderForm />
       </Container>
         </>
       ) : (
         <>
           <Heading>
-            Customer account
+            Compte client Margaron
           </Heading>
           <OrderedList fontSize='1xl' my={4}>
-            <ListItem>Find your orders</ListItem>
-            <ListItem>Renew your orders</ListItem>
+            <ListItem>Suivre vos commandes</ListItem>
+            <ListItem>Renouveller vos commandes</ListItem>
           </OrderedList>
         </>
       )}

@@ -50,21 +50,21 @@ const OrderForm = () => {
         type="text" 
         value={order.productName} 
         onChange={(e) => setOrder({ ...order, productName: e.target.value })} 
-        placeholder="Product Name"
+        placeholder="Nom du produit"
       />
       <input 
         type="number" 
         value={order.quantity} 
         onChange={(e) => setOrder({ ...order, quantity: e.target.value })} 
-        placeholder="Quantity"
+        placeholder="Quantité"
       />
       <input 
         type="text" 
         value={order.customerName} 
         readOnly 
-        placeholder="Customer Name"
+        placeholder="Nom du client"
       />
-      <Button colorScheme='blue' onClick={handleSubmit}>Submit Order</Button>
+      <Button colorScheme='blue' onClick={handleSubmit}>Commander</Button>
 
     </div>
   );

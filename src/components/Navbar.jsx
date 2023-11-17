@@ -32,13 +32,13 @@ export function Navbar() {
         <Image src='/logo-margaron.png' alt='Customer account' />
         </Link>
         <Spacer />
-        {!currentUser && <Navlink to='/login' name='Login' />}
-        {!currentUser && <Navlink to='/register' name='Register' />}
+        {!currentUser && <Navlink to='/login' name='Se connecter' />}
+        {!currentUser && <Navlink to='/register' name="S'inscrire" />}
         {currentUser && <UserMenu />} {/* Use the UserMenu component here */}
         {currentUser && (
           <Navlink
             to='/logout'
-            name='Logout'
+            name='Déconnexion'
             onClick={async (e) => {
               e.preventDefault();
               await logout();

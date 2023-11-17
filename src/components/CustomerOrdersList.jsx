@@ -46,7 +46,7 @@ const CustomerOrdersList = () => {
         quantity,
         customerName
       });
-      alert('Order renewed successfully!');
+      alert('Commande renouvellée avec succès !');
     } catch (error) {
       console.error("Error renewing order: ", error);
       alert('Error renewing order. Please try again.');
@@ -56,7 +56,7 @@ const CustomerOrdersList = () => {
   const handleDeleteOrder = async (orderId) => {
     try {
       await deleteDoc(doc(db, "orders", orderId));
-      alert('Order deleted successfully!');
+      alert('Commande supprimée avec succès!');
       setOrders(orders.filter(order => order.id !== orderId)); // Update the state to reflect the deletion
     } catch (error) {
       console.error("Error deleting order: ", error);
@@ -70,9 +70,9 @@ const CustomerOrdersList = () => {
   <Table variant="simple">
     <Thead>
       <Tr>
-        <Th>Product Name</Th>
-        <Th>Quantity</Th>
-        <Th>Customer Name</Th>
+        <Th>Nom du produit</Th>
+        <Th>Quantité</Th>
+        <Th>Nom du client</Th>
         <Th>Actions</Th>
       </Tr>
     </Thead>
@@ -83,15 +83,15 @@ const CustomerOrdersList = () => {
           <Td>{order.quantity}</Td>
           <Td>{order.customerName}</Td>
           <Td>
-            <Button colorScheme='blue' onClick={() => handleRenewOrder(order)}>Renew</Button>
-            <Button colorScheme='gray' onClick={() => handleDeleteOrder(order.id)} ml={2}>Delete</Button>
+            <Button colorScheme='blue' onClick={() => handleRenewOrder(order)}>Renouveller</Button>
+            {/* <Button colorScheme='gray' onClick={() => handleDeleteOrder(order.id)} ml={2}>Supprimer</Button> */}
           </Td>
         </Tr>
       ))}
     </Tbody>
   </Table>
 ) : (
-  <Text>No orders found.</Text>
+  <Text>Pas de commande trouvée.</Text>
 )}
 
     </>
