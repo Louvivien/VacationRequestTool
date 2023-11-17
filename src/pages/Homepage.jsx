@@ -19,7 +19,7 @@ export default function Homepage() {
       </Container>
           <br></br>
           <Container maxW='container.lg' py={4}>
-        <Heading as="h6">Passer une nouvelle commande</Heading>
+        <Heading as="h6">Nouvelle commande</Heading>
         <Text mb={4}>Saisir le détail de la commande que vous souhaitez passer</Text>
         <OrderForm />
       </Container>
