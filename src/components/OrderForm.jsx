@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
-import { Button } from '@chakra-ui/react';
+import { Table, Tbody, Tr, Td, Input, Button } from '@chakra-ui/react';
 
 
 const OrderForm = () => {
@@ -45,29 +45,47 @@ const OrderForm = () => {
   };
 
   return (
-    <div>
-      <input 
-        type="text" 
-        value={order.productName} 
-        onChange={(e) => setOrder({ ...order, productName: e.target.value })} 
-        placeholder="Nom du produit"
-      />
-      <input 
-        type="number" 
-        value={order.quantity} 
-        onChange={(e) => setOrder({ ...order, quantity: e.target.value })} 
-        placeholder="Quantité"
-      />
-      <input 
-        type="text" 
-        value={order.customerName} 
-        readOnly 
-        placeholder="Nom du client"
-      />
-      <Button colorScheme='blue' onClick={handleSubmit}>Commander</Button>
+    <Table variant="simple" size="sm">
+  <Tbody>
+    <Tr>
+      <Td minWidth="120px">
+        <Input
+          type="text"
+          value={order.productName}
+          onChange={(e) => setOrder({ ...order, productName: e.target.value })}
+          placeholder="Nom du produit"
+          minWidth="150px" // Set a minimum width for the input
+        />
+      </Td>
+      <Td minWidth="50px">
+        <Input
+          type="number"
+          value={order.quantity}
+          onChange={(e) => setOrder({ ...order, quantity: e.target.value })}
+          placeholder="Quantité"
+          minWidth="100px" // Set a minimum width for the input
+        />
+      </Td>
+      <Td minWidth="150px">
+        <Input
+          type="text"
+          value={order.customerName}
+          readOnly
+          placeholder="Nom du client"
+          minWidth="150px" // Set a minimum width for the input
+        />
+      </Td>
+      <Td>
+        <Button colorScheme="blue" onClick={handleSubmit}>
+          Commander
+        </Button>
+      </Td>
+    </Tr>
+  </Tbody>
+</Table>
 
-    </div>
   );
+  
 };
 
 export default OrderForm;

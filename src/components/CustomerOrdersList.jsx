@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { query, collection, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import { query, collection, where, getDocs, addDoc } from 'firebase/firestore';
+// import { query, collection, where, getDocs, addDoc, deleteDoc, doc } from 'firebase/firestore';
+
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Text } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -53,16 +55,16 @@ const CustomerOrdersList = () => {
     }
   };
 
-  const handleDeleteOrder = async (orderId) => {
-    try {
-      await deleteDoc(doc(db, "orders", orderId));
-      alert('Commande supprimée avec succès!');
-      setOrders(orders.filter(order => order.id !== orderId)); // Update the state to reflect the deletion
-    } catch (error) {
-      console.error("Error deleting order: ", error);
-      alert('Error deleting order. Please try again.');
-    }
-  };
+  // const handleDeleteOrder = async (orderId) => {
+  //   try {
+  //     await deleteDoc(doc(db, "orders", orderId));
+  //     alert('Commande supprimée avec succès!');
+  //     setOrders(orders.filter(order => order.id !== orderId)); // Update the state to reflect the deletion
+  //   } catch (error) {
+  //     console.error("Error deleting order: ", error);
+  //     alert('Error deleting order. Please try again.');
+  //   }
+  // };
 
   return (
     <>

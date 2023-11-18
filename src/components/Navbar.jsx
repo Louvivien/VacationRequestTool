@@ -29,7 +29,7 @@ export function Navbar() {
     >
       <HStack justifyContent='flex-end' maxW='container.lg' mx='auto' spacing={4}>
       <Link to='/'>
-        <Image src='/logo-margaron.png' alt='Customer account' />
+      <Image src='/logo-margaron.png' alt='Customer account' ml={{ base: '1rem', md: '2rem' }} />
         </Link>
         <Spacer />
         {!currentUser && <Navlink to='/login' name='Se connecter' />}

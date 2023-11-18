@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 const UserMenu = () => {
   return (
     <Menu>
-    <MenuButton as={Button} rightIcon={<FaChevronDown />}>
+    <MenuButton as={Button} rightIcon={<FaChevronDown />} minW="fit-content">
     Actions
     </MenuButton>
       <MenuList>
