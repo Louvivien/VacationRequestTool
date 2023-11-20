@@ -63,10 +63,12 @@ function ProtectedRoute(props) {
     return currentUser ? <Redirect to="/" /> : <Route {...props} />;
   }
 
-  // For other public routes like forgot-password and reset-password
-  if (path === '/forgot-password' || path === '/reset-password') {
-    return currentUser ? <Redirect to="/profile" /> : <Route {...props} />;
-  }
+  // // For other public routes like forgot-password and reset-password
+  // if (path === '/forgot-password' || path === '/reset-password') {
+  //   return currentUser ? <Redirect to="/profile" /> : <Route {...props} />;
+  // }
+
+
 
   // Protected Routes for Authenticated Users
   return currentUser ? <Route {...props} /> : <Redirect to="/login" />;
