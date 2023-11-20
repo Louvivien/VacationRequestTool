@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
   return (
     <Layout>
       <Heading textAlign='center' my={12}>
-        Reset password
+        Redéfinir le mot de passe
       </Heading>
       <Card maxW='md' mx='auto' mt={4}>
         <chakra.form
@@ -40,7 +40,7 @@ export default function ResetPasswordPage() {
             try {
               await resetPassword(query.get('oobCode'), password)
               toast({
-                description: 'Password has been changed, you can login now.',
+                description: 'Le mot de passe a été changé, vous pouvez vous connecter maintenant.',
                 status: 'success',
                 duration: 9000,
                 isClosable: true,
@@ -59,7 +59,7 @@ export default function ResetPasswordPage() {
         >
           <Stack spacing='6'>
             <FormControl id='password'>
-              <FormLabel>New password</FormLabel>
+              <FormLabel>Nouveau mot de passe</FormLabel>
               <Input
                 type='password'
                 autoComplete='password'
@@ -69,7 +69,7 @@ export default function ResetPasswordPage() {
               />
             </FormControl>
             <Button type='submit' colorScheme='pink' size='lg' fontSize='md'>
-              Reset password
+              Redéfinir mot de passe
             </Button>
           </Stack>
         </chakra.form>

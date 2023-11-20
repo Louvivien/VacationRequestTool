@@ -14,7 +14,7 @@ export default function Homepage() {
         <>
               <Container maxW='container.lg' py={4}>
         <Heading as="h6">Vos commandes</Heading>
-        <Text mb={4}>Liste de toutes les commandes que vous avez passé</Text>
+        <Text mb={4}>Liste de toutes les commandes que vous avez passées</Text>
         <CustomerOrdersList />
       </Container>
           <br></br>

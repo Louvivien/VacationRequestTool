@@ -58,7 +58,7 @@ export default function Loginpage() {
             e.preventDefault()
             if (!email || !password) {
               toast({
-                description: 'Credentials not valid.',
+                description: 'Mot de passe non valide.',
                 status: 'error',
                 duration: 9000,
                 isClosable: true,

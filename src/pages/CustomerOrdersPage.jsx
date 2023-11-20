@@ -9,8 +9,8 @@ const CustomerOrdersPage = () => {
   return (
     <Layout>
       <Container maxW='container.lg' py={4}>
-        <Heading as="h1">Your Orders</Heading>
-        <Text mb={4}>List of all orders you've submitted.</Text>
+        <Heading as="h1">Vos commandes</Heading>
+        <Text mb={4}>Liste de toutes les commandes que vous avez passées.</Text>
         <CustomerOrdersList />
       </Container>
     </Layout>

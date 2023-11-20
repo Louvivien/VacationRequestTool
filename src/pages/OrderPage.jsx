@@ -9,8 +9,8 @@ const OrderPage = () => {
   return (
     <Layout>
       <Container maxW='container.lg' py={4}>
-        <Heading as="h1">Submit an Order</Heading>
-        <Text mb={4}>Enter the details of the order you want to submit.</Text>
+        <Heading as="h1">Passer une commande</Heading>
+        <Text mb={4}>Saississez les détails de la commande que vous souhaitez passer.</Text>
         <OrderForm />
       </Container>
     </Layout>

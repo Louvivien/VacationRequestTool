@@ -5,7 +5,7 @@ import { Layout } from '../components/Layout'
 export default function NotfoundPage() {
   return (
     <Layout>
-      <Heading>Not found page</Heading>
+      <Heading>Page inexistante</Heading>
     </Layout>
   )
 }

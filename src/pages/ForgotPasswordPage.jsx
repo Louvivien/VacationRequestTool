@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
   return (
     <Layout>
       <Heading textAlign='center' my={12}>
-        Forgot password
+        Mot de passe oublié
       </Heading>
       <Card maxW='md' mx='auto' mt={4}>
         <chakra.form
@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
             try {
               await forgotPassword(email)
               toast({
-                description: `An email is sent to ${email} for password reset instructions.`,
+                description: `Un email est envoyé à ${email} avec les instruction pour redéfinir le mot de passe.`,
                 status: 'success',
                 duration: 9000,
                 isClosable: true,
@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
         >
           <Stack spacing='6'>
             <FormControl id='email'>
-              <FormLabel>Email address</FormLabel>
+              <FormLabel>Adresse email</FormLabel>
               <Input
                 name='email'
                 type='email'
@@ -65,14 +65,14 @@ export default function ForgotPasswordPage() {
               />
             </FormControl>
             <Button type='submit' colorScheme='pink' size='lg' fontSize='md'>
-              Submit
+              Envoyer
             </Button>
           </Stack>
         </chakra.form>
         <DividerWithText my={6}>OR</DividerWithText>
         <Center>
           <Button variant='link' onClick={() => history.push('/login')}>
-            Login
+            Se connecter
           </Button>
         </Center>
       </Card>
