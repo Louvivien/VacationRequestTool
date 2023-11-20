@@ -16,9 +16,11 @@ const CustomerOrdersList = () => {
     let isMounted = true;
 
     const fetchOrders = async () => {
-      if (currentUser && currentUser.displayName && isMounted) {
+      if (currentUser && isMounted) {
         try {
-          const q = query(collection(db, "orders"), where("customerName", "==", currentUser.displayName));
+          // Use displayName if it exists, otherwise fallback to email
+          const customerIdentifier = currentUser.displayName || currentUser.email;
+          const q = query(collection(db, "orders"), where("customerName", "==", customerIdentifier));
           const querySnapshot = await getDocs(q);
           const fetchedOrders = [];
           querySnapshot.forEach((doc) => {
@@ -32,7 +34,7 @@ const CustomerOrdersList = () => {
         }
       }
     };
-
+    
     fetchOrders();
 
     return () => {
@@ -58,7 +60,7 @@ const CustomerOrdersList = () => {
   // const handleDeleteOrder = async (orderId) => {
   //   try {
   //     await deleteDoc(doc(db, "orders", orderId));
-  //     alert('Commande supprimée avec succès!');
+  //     alert('Commande supprimée avec succès !');
   //     setOrders(orders.filter(order => order.id !== orderId)); // Update the state to reflect the deletion
   //   } catch (error) {
   //     console.error("Error deleting order: ", error);
@@ -83,11 +85,11 @@ const CustomerOrdersList = () => {
         <Tr key={order.id}>
           <Td>{order.productName}</Td>
           <Td>{order.quantity}</Td>
-          <Td>{order.customerName}</Td>
+          <Td>{order.customerName || currentUser.email}</Td>
           <Td>
             <Button colorScheme='blue' onClick={() => handleRenewOrder(order)}>Renouveller</Button>
             {/* <Button colorScheme='gray' onClick={() => handleDeleteOrder(order.id)} ml={2}>Supprimer</Button> */}
-          </Td>
+            </Td>
         </Tr>
       ))}
     </Tbody>
@@ -95,6 +97,8 @@ const CustomerOrdersList = () => {
 ) : (
   <Text>Pas de commande trouvée.</Text>
 )}
+
+
 
     </>
   );

@@ -9,7 +9,7 @@ import { Table, Tbody, Tr, Td, Input, Button } from '@chakra-ui/react';
 
 const OrderForm = () => {
   const { currentUser } = useAuth();
-  const initialCustomerName = currentUser?.displayName || '';
+  const initialCustomerName = currentUser?.displayName || currentUser?.email || '';
 
   const [order, setOrder] = useState({
     productName: '',
@@ -18,8 +18,9 @@ const OrderForm = () => {
   });
 
   useEffect(() => {
-    if (currentUser && currentUser.displayName) {
-      setOrder(prevOrder => ({ ...prevOrder, customerName: currentUser.displayName }));
+    if (currentUser) {
+      const nameToUse = currentUser.displayName || currentUser.email;
+      setOrder(prevOrder => ({ ...prevOrder, customerName: nameToUse }));
     }
   }, [currentUser]);
 
@@ -37,7 +38,7 @@ const OrderForm = () => {
         quantity: '',
         customerName: initialCustomerName
       });
-      alert('Order submitted successfully!');
+      alert('Commande passé avec succés!');
     } catch (e) {
       console.error("Error adding document: ", e);
       alert('Error submitting order. Please try again.');
@@ -69,10 +70,10 @@ const OrderForm = () => {
       <Td minWidth="150px">
         <Input
           type="text"
-          value={order.customerName}
+          value={order.customerName || currentUser?.email || ''}
           readOnly
           placeholder="Nom du client"
-          minWidth="150px" // Set a minimum width for the input
+          minWidth="150px"
         />
       </Td>
       <Td>
