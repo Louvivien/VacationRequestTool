@@ -83,11 +83,14 @@ const CustomerOrdersList = () => {
     <Tbody>
       {orders.map((order) => (
         <Tr key={order.id}>
-          <Td>{order.productName}</Td>
-          <Td>{order.quantity}</Td>
-          <Td>{order.customerName || currentUser.email}</Td>
+          <Td minWidth="150px">
+            {order.productName}</Td>
+          <Td minWidth="100px">
+            {order.quantity}</Td>
+          <Td minWidth="150px">
+            {order.customerName || currentUser.email}</Td>
           <Td>
-            <Button colorScheme='blue' onClick={() => handleRenewOrder(order)}>Renouveller</Button>
+            <Button colorScheme='blue'  minWidth="100px" onClick={() => handleRenewOrder(order)}>Renouveller</Button>
             {/* <Button colorScheme='gray' onClick={() => handleDeleteOrder(order.id)} ml={2}>Supprimer</Button> */}
             </Td>
         </Tr>

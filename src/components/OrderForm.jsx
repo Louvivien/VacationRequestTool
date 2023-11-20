@@ -46,10 +46,10 @@ const OrderForm = () => {
   };
 
   return (
-    <Table variant="simple" size="sm">
+    <Table variant="simple" size="xs">
   <Tbody>
     <Tr>
-      <Td minWidth="120px">
+      <Td minWidth="150px">
         <Input
           type="text"
           value={order.productName}
@@ -58,7 +58,7 @@ const OrderForm = () => {
           minWidth="150px" // Set a minimum width for the input
         />
       </Td>
-      <Td minWidth="50px">
+      <Td minWidth="100px">
         <Input
           type="number"
           value={order.quantity}
@@ -77,7 +77,7 @@ const OrderForm = () => {
         />
       </Td>
       <Td>
-        <Button colorScheme="blue" onClick={handleSubmit}>
+        <Button colorScheme="blue" minWidth="100px" onClick={handleSubmit}>
           Commander
         </Button>
       </Td>
