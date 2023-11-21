@@ -26,7 +26,7 @@ const OrderForm = () => {
 
   const handleSubmit = async () => {
     if (!order.productName || !order.quantity || !order.customerName) {
-      alert('Please fill in all fields');
+      alert('Merci de remplir tous les champs');
       return;
     }
   
