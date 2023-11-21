@@ -1,3 +1,4 @@
+// /Users/vivien/Documents/Entreprisedufutur/src/components/AppRouter.jsx
 import React from 'react'
 import {
   BrowserRouter as Router,
@@ -33,16 +34,10 @@ export default function AppRouter(props) {
           <ProtectedRoute exact path='/order' component={OrderPage} />
           <ProtectedRoute exact path='/orders' component={CustomerOrdersPage} />
 
-          <ProtectedRoute
-            exact
-            path='/forgot-password'
-            component={ForgotPasswordPage}
-          />
-          <ProtectedRoute
-            exact
-            path='/reset-password'
-            component={ResetPasswordPage}
-          />
+          <Route exact path='/forgot-password' component={ForgotPasswordPage} />
+          <Route exact path='/reset-password' component={ResetPasswordPage} />
+
+
           <Route exact path='*' component={NotfoundPage} />
         </Switch>
       </Router>

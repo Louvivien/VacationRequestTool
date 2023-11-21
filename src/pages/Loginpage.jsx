@@ -1,3 +1,5 @@
+// /Users/vivien/Documents/Entreprisedufutur/src/pages/Loginpage.jsx
+
 import {
   Button,
   chakra,
@@ -125,9 +127,13 @@ export default function Loginpage() {
           </Stack>
         </chakra.form>
         <HStack justifyContent='space-between' my={4}>
+          
+        <Link to='/forgot-password'>
           <Button variant='link'>
-            <Link to='/forgot-password'>Mot de passe oublié ?</Link>
+            Mot de passe oublié ?
           </Button>
+        </Link>
+
           <Button variant='link' onClick={() => history.push('/register')}>
             S'inscrire
           </Button>
