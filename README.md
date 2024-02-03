@@ -6,7 +6,7 @@
 The Vacation Request Tool is designed to streamline the process of managing vacation requests within an organization. This tool allows employees to easily submit their vacation requests, while providing managers and HR personnel with an efficient way to track and manage these requests. The system is built with user-friendly interfaces and is equipped with features such as date selection for the start and end of the vacation, a balance checker for paid leave days, and various categories of leave options (e.g., paid leave, unpaid leave, others). The tool ensures a smooth workflow for both the submission and review of vacation requests, thereby enhancing the overall efficiency of leave management within the company.
 
 
-# React Authentication using Firebase
+## React Authentication using Firebase
 
 Reactjs authentication using firebase auth (using the new v9 API). The benefit of using this new API is that the final bundle size is much smaller compared to the previous - which in turn makes your React site efficient and load much faster.
 
