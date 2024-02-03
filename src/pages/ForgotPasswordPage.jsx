@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
             try {
               await forgotPassword(email)
               toast({
-                description: `Un email est envoyé à ${email} avec les instruction pour redéfinir le mot de passe.`,
+                description: `Un email est envoyé à ${email} avec les instructions pour redéfinir le mot de passe.`,
                 status: 'success',
                 duration: 9000,
                 isClosable: true,

@@ -2,8 +2,8 @@ import React from 'react';
 import { Container, Text, Heading, ListItem, OrderedList } from '@chakra-ui/react';
 import { Layout } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
-import CustomerOrdersList from '../components/CustomerOrdersList';
-import OrderForm from '../components/OrderForm';
+import VacationRequestForm from '../components/VacationRequestForm';
+import VacationRequestsList from '../components/VacationRequestsList';
 
 export default function Homepage() {
   const { currentUser } = useAuth();
@@ -13,25 +13,25 @@ export default function Homepage() {
       {currentUser ? (
         <>
               <Container maxW='container.lg' py={4}>
-        <Heading as="h6">Vos commandes</Heading>
-        <Text mb={4}>Liste de toutes les commandes que vous avez passées</Text>
-        <CustomerOrdersList />
+        <Heading as="h6">Vos demandes</Heading>
+        <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
+        <VacationRequestsList />
       </Container>
           <br></br>
           <Container maxW='container.lg' py={4}>
-        <Heading as="h6">Nouvelle commande</Heading>
-        <Text mb={4}>Saisir le détail de la commande que vous souhaitez passer</Text>
-        <OrderForm />
+        <Heading as="h6">Nouvelle demande</Heading>
+        <Text mb={4}>Saisir le détail de la demande que vous souhaitez faire</Text>
+        <VacationRequestForm />
       </Container>
         </>
       ) : (
         <>
           <Heading>
-            Compte client Margaron
+            Margaron RH
           </Heading>
           <OrderedList fontSize='1xl' my={4}>
-            <ListItem>Suivre vos commandes</ListItem>
-            <ListItem>Renouveller vos commandes</ListItem>
+            <ListItem>Faites vos demandes de congés</ListItem>
+            {/* <ListItem>Renouveller vos commandes</ListItem> */}
           </OrderedList>
         </>
       )}

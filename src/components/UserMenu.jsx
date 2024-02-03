@@ -14,8 +14,8 @@ const UserMenu = () => {
       </MenuButton>
       <MenuList>
         <MenuItem as={Link} to="/">Accueil</MenuItem>
-        <MenuItem as={Link} to="/orders">Mes commandes</MenuItem>
-        <MenuItem as={Link} to="/order">Créer une commande</MenuItem>
+        <MenuItem as={Link} to="/orders">Mes demandes</MenuItem>
+        <MenuItem as={Link} to="/order">Faire une demande</MenuItem>
         <MenuItem as={Link} to="/profile">Mon profil</MenuItem>
         {/* <MenuItem as={Link} to="/reset-password">Changer de mot de passe</MenuItem> */}
         {/* Conditionally render this MenuItem */}
