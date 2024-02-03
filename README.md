@@ -1,7 +1,7 @@
 
 
 
-# Vacation Leave tool
+# Vacation Request tool
 
 This tool aim at providing a Vacation Request tool for company use.
 
