@@ -7,11 +7,21 @@ import VacationRequestsList from '../components/VacationRequestsList';
 
 export default function Homepage() {
   const { currentUser } = useAuth();
+  const { userRole } = useAuth();
+
 
   return (
     <Layout>
       {currentUser ? (
         <>
+            <div>
+      {userRole === 'admin' && (
+        <div>
+          {/* Admin-specific components */}
+          <p>Welcome, Admin!</p>
+        </div>
+      )}
+        </div>
               <Container maxW='container.lg' py={4}>
         <Heading as="h6">Vos demandes</Heading>
         <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
