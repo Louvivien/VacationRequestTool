@@ -19,7 +19,8 @@ const VacationRequestForm = () => {
     totalDays: '',
     paidLeave: false,
     unpaidLeave: false,
-    otherLeave: ''
+    otherLeave: '',
+    status: 'en attente' // Initialize status with 'en attente'
   });
 
   useEffect(() => {
@@ -37,10 +38,14 @@ const VacationRequestForm = () => {
     }
 
     try {
-      const docRef = await addDoc(collection(db, "vacationRequests"), request);
+      // Include the status field when adding the document
+      const docRef = await addDoc(collection(db, "vacationRequests"), {
+        ...request,
+        status: 'en attente' // Ensure status is set to 'en attente' when creating the document
+      });
       console.log("Document written with ID: ", docRef.id);
       alert('Demande de congés envoyée avec succès!');
-      // Reset form after successful submission
+      // Reset form after successful submission, including resetting status if needed
       setRequest({
         customerName: initialCustomerName,
         entryDate: '',
@@ -50,7 +55,8 @@ const VacationRequestForm = () => {
         totalDays: '',
         paidLeave: false,
         unpaidLeave: false,
-        otherLeave: ''
+        otherLeave: '',
+        status: 'en attente' // Reset status to 'en attente'
       });
     } catch (e) {
       console.error("Error adding document: ", e);

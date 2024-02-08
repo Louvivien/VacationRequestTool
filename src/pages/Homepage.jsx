@@ -4,6 +4,8 @@ import { Layout } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import VacationRequestForm from '../components/VacationRequestForm';
 import VacationRequestsList from '../components/VacationRequestsList';
+import VacationRequestsListAdmin from '../components/VacationRequestsListAdmin'; // Import the admin version
+
 
 export default function Homepage() {
   const { currentUser } = useAuth();
@@ -25,7 +27,10 @@ export default function Homepage() {
               <Container maxW='container.lg' py={4}>
         <Heading as="h6">Vos demandes</Heading>
         <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
-        <VacationRequestsList />
+        {
+          // Conditionally render based on the user's role
+          userRole === 'admin' ? <VacationRequestsListAdmin /> : <VacationRequestsList />
+        }
       </Container>
           <br></br>
           <Container maxW='container.lg' py={4}>
