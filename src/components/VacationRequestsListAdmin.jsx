@@ -61,7 +61,7 @@ const VacationRequestsListAdmin = () => {
         <Table variant="simple">
         <Thead>
           <Tr>
-            <Th>Nom du client</Th>
+            <Th>Nom de l'employé</Th>
             <Th>Date de début</Th>
             <Th>Date de fin</Th>
             <Th>Statut</Th>

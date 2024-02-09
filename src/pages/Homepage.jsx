@@ -26,7 +26,12 @@ export default function Homepage() {
         </div>
               <Container maxW='container.lg' py={4}>
         <Heading as="h6">Vos demandes</Heading>
-        <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
+        
+        {
+          // Conditionally render based on the user's role
+          userRole === 'admin' ? <Text mb={4}>Liste de toutes les demandes</Text> : <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
+        }
+
         {
           // Conditionally render based on the user's role
           userRole === 'admin' ? <VacationRequestsListAdmin /> : <VacationRequestsList />
