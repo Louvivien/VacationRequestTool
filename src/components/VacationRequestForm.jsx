@@ -12,7 +12,7 @@ const VacationRequestForm = () => {
 
   const [request, setRequest] = useState({
     customerName: initialCustomerName,
-    entryDate: '',
+    // entryDate: '',
     paidLeaveBalance: '',
     startDate: '',
     endDate: '',
@@ -32,7 +32,9 @@ const VacationRequestForm = () => {
 
   const handleSubmit = async () => {
     // Validation checks
-    if (!request.entryDate || !request.startDate || !request.endDate || !request.totalDays) {
+    // if (!request.entryDate || !request.startDate || !request.endDate || !request.totalDays) {
+    if (!request.startDate || !request.endDate || !request.totalDays) {
+
       alert('Merci de remplir tous les champs nécessaires');
       return;
     }
@@ -48,7 +50,7 @@ const VacationRequestForm = () => {
       // Reset form after successful submission, including resetting status if needed
       setRequest({
         customerName: initialCustomerName,
-        entryDate: '',
+        // entryDate: '',
         paidLeaveBalance: '',
         startDate: '',
         endDate: '',
@@ -72,13 +74,13 @@ const VacationRequestForm = () => {
         readOnly
         placeholder="Nom du client"
       />
-      <Text>Date d'entrée dans l'entreprise :</Text>
+      {/* <Text>Date d'entrée dans l'entreprise :</Text>
       <Input
         type="date"
         value={request.entryDate}
         onChange={(e) => setRequest({ ...request, entryDate: e.target.value })}
         placeholder="Date entrée"
-      />
+      /> */}
 
       <Input
         type="number"
