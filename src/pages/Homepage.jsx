@@ -4,7 +4,8 @@ import { Layout } from '../components/Layout';
 import { useAuth } from '../contexts/AuthContext';
 import VacationRequestForm from '../components/VacationRequestForm';
 import VacationRequestsList from '../components/VacationRequestsList';
-import VacationRequestsListAdmin from '../components/VacationRequestsListAdmin'; // Import the admin version
+import VacationRequestsListAdmin from '../components/VacationRequestsListAdmin'; 
+import VacationRequestsListManager from '../components/VacationRequestsListManager';
 
 
 export default function Homepage() {
@@ -23,19 +24,32 @@ export default function Homepage() {
           <p>Welcome, Admin!</p>
         </div>
       )}
+      {userRole === 'manager' && (
+        <div>
+          {/* Manager-specific components */}
+          <p>Welcome, Manager!</p>
+        </div>
+      )}
         </div>
               <Container maxW='container.lg' py={4}>
         <Heading as="h6">Vos demandes</Heading>
         
-        {
-          // Conditionally render based on the user's role
-          userRole === 'admin' ? <Text mb={4}>Liste de toutes les demandes</Text> : <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
-        }
 
-        {
-          // Conditionally render based on the user's role
-          userRole === 'admin' ? <VacationRequestsListAdmin /> : <VacationRequestsList />
-        }
+
+          {
+            // Conditionally render based on the user's role
+            userRole === 'admin' || userRole === 'manager' ? 
+            <Text mb={4}>Liste de toutes les demandes</Text> : 
+            <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
+          }
+
+          {
+            // Conditionally render based on the user's role
+            userRole === 'admin' ? <VacationRequestsListAdmin /> : 
+            userRole === 'manager' ? <VacationRequestsListManager /> : 
+            <VacationRequestsList />
+          }
+
       </Container>
           <br></br>
           <Container maxW='container.lg' py={4}>

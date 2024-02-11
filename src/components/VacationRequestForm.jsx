@@ -2,17 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { Input, Button, Checkbox, VStack, Text } from '@chakra-ui/react';
 
 const VacationRequestForm = () => {
   const { currentUser } = useAuth();
   const initialCustomerName = currentUser?.displayName || currentUser?.email || '';
+  const [userDetails, setUserDetails] = useState({
+    employeeNumber: '',
+    managerEmployeeNumber: ''
+  });
 
   const [request, setRequest] = useState({
     customerName: initialCustomerName,
-    // entryDate: '',
     paidLeaveBalance: '',
     startDate: '',
     endDate: '',
@@ -20,37 +23,47 @@ const VacationRequestForm = () => {
     paidLeave: false,
     unpaidLeave: false,
     otherLeave: '',
-    status: 'en attente' // Initialize status with 'en attente'
+    status: 'en attente'
   });
 
   useEffect(() => {
-    if (currentUser) {
-      const nameToUse = currentUser.displayName || currentUser.email;
-      setRequest(prevRequest => ({ ...prevRequest, customerName: nameToUse }));
-    }
-  }, [currentUser]);
+    const fetchUserDetails = async () => {
+      if (currentUser) {
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserDetails({
+            employeeNumber: userData.employeeNumber,
+            managerEmployeeNumber: userData.managerEmployeeNumber
+          });
+          setRequest(prevRequest => ({
+            ...prevRequest,
+            customerName: userData.displayName || userData.email || initialCustomerName,
+          }));
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [currentUser, initialCustomerName]);
 
   const handleSubmit = async () => {
-    // Validation checks
-    // if (!request.entryDate || !request.startDate || !request.endDate || !request.totalDays) {
     if (!request.startDate || !request.endDate || !request.totalDays) {
-
       alert('Merci de remplir tous les champs nécessaires');
       return;
     }
 
     try {
-      // Include the status field when adding the document
       const docRef = await addDoc(collection(db, "vacationRequests"), {
         ...request,
-        status: 'en attente' // Ensure status is set to 'en attente' when creating the document
+        ...userDetails, // Include employeeNumber and managerEmployeeNumber
+        status: 'en attente'
       });
       console.log("Document written with ID: ", docRef.id);
       alert('Demande de congés envoyée avec succès!');
-      // Reset form after successful submission, including resetting status if needed
       setRequest({
         customerName: initialCustomerName,
-        // entryDate: '',
         paidLeaveBalance: '',
         startDate: '',
         endDate: '',
@@ -58,7 +71,7 @@ const VacationRequestForm = () => {
         paidLeave: false,
         unpaidLeave: false,
         otherLeave: '',
-        status: 'en attente' // Reset status to 'en attente'
+        status: 'en attente'
       });
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -74,13 +87,6 @@ const VacationRequestForm = () => {
         readOnly
         placeholder="Nom du client"
       />
-      {/* <Text>Date d'entrée dans l'entreprise :</Text>
-      <Input
-        type="date"
-        value={request.entryDate}
-        onChange={(e) => setRequest({ ...request, entryDate: e.target.value })}
-        placeholder="Date entrée"
-      /> */}
 
       <Input
         type="number"
@@ -139,3 +145,5 @@ const VacationRequestForm = () => {
 };
 
 export default VacationRequestForm;
+
+
