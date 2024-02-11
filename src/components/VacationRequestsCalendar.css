@@ -1,0 +1,50 @@
+.calendar-line {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  background-color: #f0f0f0;
+  padding: 10px;
+}
+
+.day-cell {
+  flex: none;
+  width: 120px;
+  min-height: 100px;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Corrected for compatibility */
+  align-items: center;
+  position: relative;
+}
+
+.date-header {
+  font-weight: bold;
+}
+
+.request {
+  text-align: center;
+  padding: 4px;
+  margin-top: 4px;
+  border-radius: 4px;
+  width: 90%;
+}
+
+.request.en-attente {
+  background-color: yellow;
+}
+
+.request.accepté {
+  background-color: limegreen;
+  color: white;
+}
+
+.request.refusé {
+  background-color: red;
+  color: white;
+}
+
+.no-request {
+  flex-grow: 1;
+  width: 100%;
+}

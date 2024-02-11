@@ -16,6 +16,7 @@ import Registerpage from '../pages/Registerpage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
 import TestPage from '../pages/TestPage'
 import OrderPage from '../pages/OrderPage';
+import CalendarPage from '../pages/CalendarPage';
 import CustomerOrdersPage from '../pages/CustomerOrdersPage';
 
 
@@ -32,6 +33,7 @@ export default function AppRouter(props) {
           <ProtectedRoute exact path='/profile' component={Profilepage} />
           <ProtectedRoute exact path='/test' component={TestPage} />
           <ProtectedRoute exact path='/order' component={OrderPage} />
+          <ProtectedRoute exact path='/calendar' component={CalendarPage} />
           <ProtectedRoute exact path='/orders' component={CustomerOrdersPage} />
 
           <Route exact path='/forgot-password' component={ForgotPasswordPage} />
