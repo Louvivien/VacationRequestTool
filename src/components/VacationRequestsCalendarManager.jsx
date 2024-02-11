@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, addMonths, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale'; // Import French locale
 import { db } from '../utils/init-firebase';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -55,8 +56,8 @@ const VacationRequestsCalendarManager = () => {
 
   const renderDay = (day) => {
     const formattedDate = format(day, 'yyyy-MM-dd');
-    const dayName = format(day, 'EEE');
-    const dateDisplay = format(day, 'd');
+    const dayName = format(day, 'EEE', { locale: fr }); // Use French locale for day names
+    const dateDisplay = format(day, 'd', { locale: fr }); // Use French locale for date
     const dayRequests = requests.filter(req => day >= req.startDate && day <= req.endDate);
 
     return (

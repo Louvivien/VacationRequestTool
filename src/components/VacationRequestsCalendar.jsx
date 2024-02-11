@@ -1,5 +1,9 @@
+///Users/vivien/Documents/MargaRH/src/components/VacationRequestsCalendar.jsx
+
+
 import React, { useState, useEffect } from 'react';
 import { format, eachDayOfInterval, startOfMonth, endOfMonth, addMonths } from 'date-fns';
+import { fr } from 'date-fns/locale'; // Import French locale
 import { db } from '../utils/init-firebase';
 import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,7 +16,6 @@ const VacationRequestsCalendar = () => {
   const [employeeNumber, setEmployeeNumber] = useState('');
 
   useEffect(() => {
-    // Fetch the current user's employeeNumber first
     const fetchEmployeeNumber = async () => {
       if (currentUser) {
         const userRef = doc(db, "users", currentUser.uid);
@@ -27,15 +30,12 @@ const VacationRequestsCalendar = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    // Once we have the employeeNumber, fetch the corresponding vacation requests
     const fetchRequests = async () => {
       if (employeeNumber) {
-        const q = query(collection(db, "vacationRequests"), 
-                         where("employeeNumber", "==", employeeNumber));
+        const q = query(collection(db, "vacationRequests"), where("employeeNumber", "==", employeeNumber));
         const querySnapshot = await getDocs(q);
         const fetchedRequests = querySnapshot.docs.map(doc => {
           const data = doc.data();
-          // Check and convert startDate and endDate if they are not Date objects
           const startDate = data.startDate instanceof Date ? data.startDate : new Date(data.startDate);
           const endDate = data.endDate instanceof Date ? data.endDate : new Date(data.endDate);
           return { ...data, startDate, endDate };
@@ -49,14 +49,14 @@ const VacationRequestsCalendar = () => {
 
   useEffect(() => {
     const start = startOfMonth(new Date());
-    const end = endOfMonth(addMonths(new Date(), 2)); // Displaying 3 months
+    const end = endOfMonth(addMonths(new Date(), 2));
     setCurrentMonthDays(eachDayOfInterval({ start, end }));
   }, []);
 
   const renderDay = (day) => {
     const formattedDate = format(day, 'yyyy-MM-dd');
-    const dayName = format(day, 'EEE');
-    const dateDisplay = format(day, 'd');
+    const dayName = format(day, 'EEE', { locale: fr }); // Use French locale for day names
+    const dateDisplay = format(day, 'd', { locale: fr }); // Use French locale for date
     const request = requests.find(req => day >= req.startDate && day <= req.endDate);
 
     return (
@@ -81,3 +81,4 @@ const VacationRequestsCalendar = () => {
 };
 
 export default VacationRequestsCalendar;
+
