@@ -37,16 +37,18 @@ const VacationRequestForm = () => {
             employeeNumber: userData.employeeNumber,
             managerEmployeeNumber: userData.managerEmployeeNumber
           });
+          // Prioritize 'name', then 'displayName', then 'email'
           setRequest(prevRequest => ({
             ...prevRequest,
-            customerName: userData.displayName || userData.email || initialCustomerName,
+            customerName: userData.name || userData.displayName || userData.email || initialCustomerName,
           }));
         }
       }
     };
-
+  
     fetchUserDetails();
   }, [currentUser, initialCustomerName]);
+  
 
   const handleSubmit = async () => {
     if (!request.startDate || !request.endDate || !request.totalDays) {
