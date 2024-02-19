@@ -12,6 +12,7 @@ const UsersPage = () => {
     <Layout>
       <Container maxW='container.lg' py={4}>
         <Heading as="h1">Gestion des utilisateurs</Heading>
+        <Text mb={4}>Modifier la liste des utilisateurs</Text>
 
         {
           // Conditionally render based on the user's role

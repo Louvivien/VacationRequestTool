@@ -31,7 +31,7 @@
 }
 
 .request.en-attente {
-  background-color: yellow;
+  background-color: rgb(195, 189, 189);
 }
 
 .request.accepté {
