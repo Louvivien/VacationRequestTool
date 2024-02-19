@@ -1,11 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
 import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import {
+  Input,
+  Button,
+  Select,
+  FormControl,
+  FormLabel,
+  Container,
+  VStack,
+  HStack,
+  List,
+  ListItem,
+  IconButton,
+  useToast,
+} from '@chakra-ui/react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [currentUser, setCurrentUser] = useState(null); // For add/edit form
-  const [formMode, setFormMode] = useState('add'); // 'add' or 'edit'
+  const [currentUser, setCurrentUser] = useState(null);
+  const [formMode, setFormMode] = useState('add');
+  const toast = useToast();
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -31,14 +47,31 @@ const UserManagement = () => {
     e.preventDefault();
     const userData = { email, employeeNumber, managerEmployeeNumber, name, role };
 
-    if (formMode === 'add') {
-      await addDoc(collection(db, "users"), userData);
-    } else if (formMode === 'edit' && currentUser) {
-      await updateDoc(doc(db, "users", currentUser.id), userData);
+    try {
+      if (formMode === 'add') {
+        await addDoc(collection(db, "users"), userData);
+      } else if (formMode === 'edit' && currentUser) {
+        await updateDoc(doc(db, "users", currentUser.id), userData);
+      }
+      toast({
+        title: formMode === 'add' ? "Utilisateur ajouté" : "Utilisateur mis à jour",
+        description: `L'utilisateur a été ${formMode === 'add' ? "ajouté" : "mis à jour"} avec succès.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de l'opération.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
 
     resetForm();
-    fetchUsers(); // Refresh the list
+    fetchUsers();
   };
 
   const handleEdit = (user) => {
@@ -53,7 +86,7 @@ const UserManagement = () => {
 
   const handleDelete = async (userId) => {
     await deleteDoc(doc(db, "users", userId));
-    fetchUsers(); // Refresh the list
+    fetchUsers();
   };
 
   const resetForm = () => {
@@ -67,31 +100,49 @@ const UserManagement = () => {
   };
 
   return (
-    <div>
-      <h2>User Management</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-        <input type="text" value={employeeNumber} onChange={(e) => setEmployeeNumber(e.target.value)} placeholder="Employee Number" required />
-        <input type="text" value={managerEmployeeNumber} onChange={(e) => setManagerEmployeeNumber(e.target.value)} placeholder="Manager Employee Number" />
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required />
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="user">User</option>
-          <option value="admin">Admin</option>
-          <option value="manager">Manager</option>
-        </select>
-        <button type="submit">{formMode === 'add' ? 'Add User' : 'Update User'}</button>
-        {formMode === 'edit' && <button type="button" onClick={resetForm}>Cancel Edit</button>}
-      </form>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            {user.name} ({user.email}) - {user.role}
-            <button onClick={() => handleEdit(user)}>Edit</button>
-            <button onClick={() => handleDelete(user.id)}>Delete</button>
-          </li>
+    <Container maxW="container.xl">
+      <VStack as="form" onSubmit={handleSubmit} spacing={4} p={4} borderWidth="1px" borderRadius="lg">
+        <FormControl isRequired>
+          <FormLabel>Nom</FormLabel>
+          <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel>Email</FormLabel>
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel>Numéro d'employé</FormLabel>
+          <Input type="text" value={employeeNumber} onChange={(e) => setEmployeeNumber(e.target.value)} placeholder="Numéro d'employé" />
+        </FormControl>
+        <FormControl>
+          <FormLabel>Numéro manager</FormLabel>
+          <Input type="text" value={managerEmployeeNumber} onChange={(e) => setManagerEmployeeNumber(e.target.value)} placeholder="Numéro manager" />
+        </FormControl>
+        <FormControl isRequired>
+          <FormLabel>Rôle</FormLabel>
+          <Select value={role} onChange={(e) => setRole(e.target.value)}>
+            <option value="user">Utilisateur</option>
+            <option value="admin">Administrateur</option>
+            <option value="manager">Manager</option>
+          </Select>
+        </FormControl>
+        <Button type="submit" colorScheme={formMode === 'add' ? "blue" : "orange"}>
+          {formMode === 'add' ? 'Ajouter' : 'Mettre à jour'}
+        </Button>
+        {formMode === 'edit' && <Button onClick={resetForm} colorScheme="gray">Annuler</Button>}
+      </VStack>
+      <List spacing={3} my={4}>
+        {users.map((user) => (
+          <ListItem key={user.id} d="flex" justifyContent="space-between" alignItems="center">
+            {`${user.name} (${user.email}) - ${user.role}`}
+            <HStack>
+              <IconButton icon={<FaEdit />} aria-label="Edit" onClick={() => handleEdit(user)} colorScheme="yellow" />
+              <IconButton icon={<FaTrash />} aria-label="Delete" onClick={() => handleDelete(user.id)} colorScheme="red" />
+            </HStack>
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Container>
   );
 };
 
