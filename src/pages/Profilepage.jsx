@@ -29,32 +29,33 @@ export default function ProfilePage() {
   return (
     <Layout>
       <Container maxW='container.lg' py={4}>
-        <Heading mb={4}>Profile Page</Heading>
+        <Heading mb={4}>Page de profil</Heading>
         {userInfo ? (
           <VStack spacing={4} alignItems="flex-start">
             <Box>
-              <Text fontWeight="bold">Email:</Text>
-              <Text>{userInfo.email}</Text>
-            </Box>
-            <Box>
-              <Text fontWeight="bold">Employee Number:</Text>
-              <Text>{userInfo.employeeNumber}</Text>
-            </Box>
-            <Box>
-              <Text fontWeight="bold">Manager Employee Number:</Text>
-              <Text>{userInfo.managerEmployeeNumber}</Text>
-            </Box>
-            <Box>
-              <Text fontWeight="bold">Name:</Text>
+              <Text fontWeight="bold">Nom :</Text>
               <Text>{userInfo.name}</Text>
             </Box>
             <Box>
-              <Text fontWeight="bold">Role:</Text>
+              <Text fontWeight="bold">Rôle :</Text>
               <Text>{userInfo.role}</Text>
             </Box>
+            <Box>
+              <Text fontWeight="bold">Email :</Text>
+              <Text>{userInfo.email}</Text>
+            </Box>
+            <Box>
+              <Text fontWeight="bold">Numéro d'employé :</Text>
+              <Text>{userInfo.employeeNumber}</Text>
+            </Box>
+            <Box>
+              <Text fontWeight="bold">Numéro du manager :</Text>
+              <Text>{userInfo.managerEmployeeNumber}</Text>
+            </Box>
+
           </VStack>
         ) : (
-          <Text>Loading user information...</Text>
+          <Text>Chargement des informations de profile...</Text>
         )}
       </Container>
     </Layout>
