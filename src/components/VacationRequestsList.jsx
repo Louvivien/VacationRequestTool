@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { query, collection, where, getDocs } from 'firebase/firestore';
+import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,34 +12,33 @@ const VacationRequestsList = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedRequest, setSelectedRequest] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
 
-    const fetchRequests = async () => {
-      if (currentUser && isMounted) {
-        try {
-          const customerIdentifier = currentUser.displayName || currentUser.email;
-          const q = query(collection(db, "vacationRequests"), where("customerName", "==", customerIdentifier));
+  useEffect(() => {
+    const fetchUserAndRequests = async () => {
+      if (currentUser) {
+        // Fetch the current user's name from the 'users' collection
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          const userName = userSnap.data().name;
+          
+          // Use the fetched name to query the 'vacationRequests' collection
+          const q = query(collection(db, "vacationRequests"), where("customerName", "==", userName));
           const querySnapshot = await getDocs(q);
           const fetchedRequests = [];
           querySnapshot.forEach((doc) => {
             fetchedRequests.push({ id: doc.id, ...doc.data() });
           });
-          if (isMounted) {
-            setRequests(fetchedRequests);
-          }
-        } catch (error) {
-          console.error("Error fetching requests: ", error);
+          setRequests(fetchedRequests);
+        } else {
+          console.log("User document not found");
         }
       }
     };
-    
-    fetchRequests();
 
-    return () => {
-      isMounted = false;
-    };
+    fetchUserAndRequests();
   }, [currentUser]);
+
 
   const handleOpenModal = (request) => {
     setSelectedRequest(request);
