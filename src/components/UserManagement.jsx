@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore'; // Ensure setDoc is imported
+import { createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase auth functions
+import { auth } from '../utils/init-firebase'; // Ensure you import your Firebase auth instance
 import {
   Input,
   Button,
@@ -45,34 +47,59 @@ const UserManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const userData = { email, employeeNumber, managerEmployeeNumber, name, role };
-
+  
+    // Immediately capture form data to ensure it's not affected by async operations
+    const capturedData = { 
+      email, 
+      employeeNumber, 
+      managerEmployeeNumber, 
+      name, 
+      role 
+    };
+  
     try {
       if (formMode === 'add') {
-        await addDoc(collection(db, "users"), userData);
+        // Create the user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, capturedData.email, "test123");
+  
+        // Ensure capturedData is used here directly
+        await setDoc(doc(db, "users", userCredential.user.uid), capturedData);
+  
+        toast({
+          title: "Utilisateur ajouté",
+          description: "L'utilisateur a été ajouté avec succès.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
       } else if (formMode === 'edit' && currentUser) {
-        await updateDoc(doc(db, "users", currentUser.id), userData);
+        // Use capturedData for consistency
+        await updateDoc(doc(db, "users", currentUser.id), capturedData);
+  
+        toast({
+          title: "Utilisateur mis à jour",
+          description: "L'utilisateur a été mis à jour avec succès.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
       }
-      toast({
-        title: formMode === 'add' ? "Utilisateur ajouté" : "Utilisateur mis à jour",
-        description: `L'utilisateur a été ${formMode === 'add' ? "ajouté" : "mis à jour"} avec succès.`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
     } catch (error) {
       toast({
         title: "Erreur",
-        description: "Une erreur s'est produite lors de l'opération.",
+        description: error.message,
         status: "error",
         duration: 5000,
         isClosable: true,
       });
     }
-
+  
     resetForm();
     fetchUsers();
   };
+  
+  
+  
 
   const handleEdit = (user) => {
     setCurrentUser(user);

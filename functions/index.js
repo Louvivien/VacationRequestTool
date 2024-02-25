@@ -1,3 +1,5 @@
+// MargaRH/functions/index.js
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
@@ -36,20 +38,49 @@ exports.sendVacationRequestEmail = functions.firestore
     .onCreate(async (snap, context) => {
       const request = snap.data();
 
+      // Fetch the user document to get the managerEmployeeNumber
+      const userRef = await admin.firestore().collection("users").where("employeeNumber", "==", request.employeeNumber).get();
+
+      if (!userRef.empty) {
+        const user = userRef.docs[0].data();
+        // Check if managerEmployeeNumber is not "00"
+        if (user.managerEmployeeNumber && user.managerEmployeeNumber !== "00") {
+          // Fetch the manager's email using managerEmployeeNumber
+          const managerRef = await admin.firestore().collection("users").where("employeeNumber", "==", user.managerEmployeeNumber).get();
+
+          if (!managerRef.empty) {
+            const manager = managerRef.docs[0].data();
+            // Send an email to the manager if found
+            const managerMsg = {
+              to: manager.email, // Manager email
+              from: "vivien.richaud@gmail.com", // Use a verified sender email address
+              subject: "Nouvelle demande de congé",
+              text: `Une nouvelle demande de congé a été faite par ${request.customerName}. Merci de la prendre en compte.`,
+              html: `<strong>Une nouvelle demande de congé a été faite par ${request.customerName}. Merci de la prendre en compte.</strong>`,
+            };
+            try {
+              await sgMail.send(managerMsg);
+              console.log("Email sent to manager");
+            } catch (error) {
+              console.error("Error sending email to manager", error);
+            }
+          }
+        }
+      }
+
+      // Original message sending logic to admin
       const msg = {
         to: functions.config().sendgrid.email, // Admin email
         from: "vivien.richaud@gmail.com", // Use a verified sender email address
-        subject: "New Vacation Request",
-        text: `A new vacation request has been made by ${request.name || request.email}. ` +
-        `Please review it at your earliest convenience.`,
-        html: `<strong>A new vacation request has been made by ${request.name || request.email}.` +
-        `Please review it.</strong>`,
+        subject: "Nouvelle demande de congé",
+        text: `Une nouvelle demande de congé à été faite par ${request.customerName}. Merci de la prendre en compte.`,
+        html: `<strong>Une nouvelle demande de congé à été faite par ${request.customerName}. Merci de la prendre en compte.</strong>`,
       };
 
       try {
         await sgMail.send(msg);
-        console.log("Email sent");
+        console.log("Email sent to admin");
       } catch (error) {
-        console.error("Error sending email", error);
+        console.error("Error sending email to admin", error);
       }
     });
