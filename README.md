@@ -7,14 +7,17 @@ The Vacation Request Tool is designed to streamline the process of managing vaca
 
 There are 3 roles: admin, manager and user. Admin can see all vacation requests. Manager can see vacation requests of its employees. They both can validate the requests. Admin will receive an email each time a request is made by anyone. Manager will receive an email each time a request is made by its employees. 
 
-There is a calendar where its possible to see the vacation requests
+There is a calendar where its possible to see the vacation requests.
+
+The admin can add or edit users, changing roles of any user profile information.
 
 
 ## Features
 
-- Authentication using firebase 
-- Notifications through firebase Cloud functions
-- ChakraUI with Dark Mode
+- Authentication using Firebase and ReactJS
+- Notifications through Firebase Cloud functions
+- UI: ChakraUI with Dark Mode
+- User management system
 
 
 ## Prerequisite
@@ -36,5 +39,11 @@ Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 _**Note**: Before running `npm start` do place the relevant environment variables in the `.env.local` file for firebase configuration._
+
+
+## Work in progress
+
+- User management system: for now when adding a new user the admin is deconnected and he needs to edit the user profile information afterwards. Ideally when adding a user all information about the new user profile must be saved immediatly and the admin must not be deconnected.  
+
 
 
