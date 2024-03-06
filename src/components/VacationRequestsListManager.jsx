@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { query, collection, getDocs, doc, updateDoc, where, getDoc } from 'firebase/firestore';
-import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
+import { query, collection, getDocs, doc, updateDoc, where, orderBy, getDoc } from 'firebase/firestore';
+import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Box, ModalFooter } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
-import { format, parseISO, subWeeks, isAfter } from 'date-fns';
+import { format, subWeeks, startOfDay, parseISO } from 'date-fns';
 
 const VacationRequestsListManager = () => {
   const { currentUser } = useAuth();
@@ -12,29 +12,29 @@ const VacationRequestsListManager = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
 
   useEffect(() => {
-    const fetchManagerAndRequests = async () => {
+    const fetchManagerInfoAndRequests = async () => {
       if (currentUser) {
-        // Fetch manager's employee number
         const userRef = doc(db, "users", currentUser.uid);
         const docSnap = await getDoc(userRef);
         if (docSnap.exists()) {
-          const managerEmployeeNumber = docSnap.data().employeeNumber;
-          const twoWeeksAgo = subWeeks(new Date(), 2);
-          // Query for vacation requests
-          const q = query(collection(db, "vacationRequests"), where("managerEmployeeNumber", "==", managerEmployeeNumber));
+          const twoWeeksAgo = subWeeks(startOfDay(new Date()), 2);
+
+          let q = query(
+            collection(db, "vacationRequests"), 
+            where("managerEmployeeNumber", "==", docSnap.data().employeeNumber), 
+            orderBy("startDate", "asc")
+          );
           const querySnapshot = await getDocs(q);
-          const fetchedRequests = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            data.startDate = parseISO(data.startDate);
-            data.endDate = parseISO(data.endDate);
-            return { id: doc.id, ...data };
-          }).filter(request => isAfter(request.startDate, twoWeeksAgo));
-          setRequests(fetchedRequests);
+          const filteredRequests = querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(req => parseISO(req.startDate) >= twoWeeksAgo); // Ensure startDate is compared correctly
+
+          setRequests(filteredRequests);
         }
       }
     };
 
-    fetchManagerAndRequests();
+    fetchManagerInfoAndRequests();
   }, [currentUser]);
 
   const updateRequestStatus = async (id, newStatus) => {
@@ -75,12 +75,10 @@ const VacationRequestsListManager = () => {
             {requests.map((request) => (
               <Tr key={request.id}>
                 <Td>{request.customerName}</Td>
-                <Td>{format(request.startDate, 'dd/MM/yyyy')}</Td>
-                <Td>{format(request.endDate, 'dd/MM/yyyy')}</Td>
+                <Td>{format(new Date(request.startDate), 'dd/MM/yyyy')}</Td>
+                <Td>{format(new Date(request.endDate), 'dd/MM/yyyy')}</Td>
                 <Td>
-                  <Box as="span" p={1} bg={getStatusBgColor(request.status)} borderRadius="md">
-                    {request.status}
-                  </Box>
+                  <Box as="span" p={1} bg={getStatusBgColor(request.status)} borderRadius="md">{request.status}</Box>
                 </Td>
                 <Td>
                   <Button colorScheme='blue' onClick={() => handleOpenModal(request)}>Détails</Button>
@@ -89,7 +87,9 @@ const VacationRequestsListManager = () => {
             ))}
           </Tbody>
         </Table>
-      ) : <Text>Aucune demande trouvée.</Text>}
+      ) : (
+        <Text>Aucune demande trouvée.</Text>
+      )}
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -100,12 +100,12 @@ const VacationRequestsListManager = () => {
             {selectedRequest && (
               <>
                 <Text>Nom: {selectedRequest.customerName}</Text>
-                <Text>Date de début: {format(selectedRequest.startDate, 'dd/MM/yyyy')}</Text>
-                <Text>Date de fin: {format(selectedRequest.endDate, 'dd/MM/yyyy')}</Text>
+                <Text>Date de début: {format(new Date(selectedRequest.startDate), 'dd/MM/yyyy')}</Text>
+                <Text>Date de fin: {format(new Date(selectedRequest.endDate), 'dd/MM/yyyy')}</Text>
                 <Text>Solde congés payés (jours ouvrés): {selectedRequest.paidLeaveBalance}</Text>
                 <Text>Type de congé: {selectedRequest.paidLeave ? "Congés Payés" : (selectedRequest.unpaidLeave ? "Sans solde" : "Autres")}</Text>
-                <Text>Statut: {selectedRequest.status}</Text>
                 <Text>Autres informations: {selectedRequest.otherLeave}</Text>
+                <Text>Statut: {selectedRequest.status}</Text>
               </>
             )}
           </ModalBody>

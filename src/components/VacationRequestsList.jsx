@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
-import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
+import { query, collection, where, getDocs, doc, getDoc, orderBy } from 'firebase/firestore';
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
 import { format, parseISO, subWeeks } from 'date-fns';
@@ -19,8 +19,12 @@ const VacationRequestsList = () => {
         if (userSnap.exists()) {
           const userName = userSnap.data().name;
           const twoWeeksAgo = subWeeks(new Date(), 2);
-          const q = query(collection(db, "vacationRequests"), where("customerName", "==", userName));
-          const querySnapshot = await getDocs(q);
+          const q = query(
+            collection(db, "vacationRequests"),
+            where("customerName", "==", userName),
+            orderBy("startDate"), // Order the results by startDate
+          );
+           const querySnapshot = await getDocs(q);
           const fetchedRequests = querySnapshot.docs
             .map(doc => {
               const data = doc.data();
