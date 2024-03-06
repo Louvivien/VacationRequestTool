@@ -14,11 +14,13 @@ const CustomerOrdersPage = () => {
       <Container maxW='container.lg' py={4}>
         <Heading as="h1">Vos demandes</Heading>
         {
-            // Conditionally render based on the user's role
-            userRole === 'admin' || userRole === 'manager' ? 
+            userRole === 'admin' ? 
             <Text mb={4}>Liste de toutes les demandes</Text> : 
-            <Text mb={4}>Liste de toutes les demandes que vous avez faites</Text>
+            (userRole === 'manager' ? 
+            <Text mb={4}>Liste des dernières demandes</Text> : 
+            <Text mb={4}>Liste des dernières demandes que vous avez faites</Text>)
           }
+
 
         {
             // Conditionally render based on the user's role

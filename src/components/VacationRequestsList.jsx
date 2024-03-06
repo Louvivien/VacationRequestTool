@@ -3,7 +3,7 @@ import { db } from '../utils/init-firebase';
 import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
-import { subWeeks, parseISO } from 'date-fns';
+import { format, parseISO, subWeeks } from 'date-fns';
 
 const VacationRequestsList = () => {
   const { currentUser } = useAuth();
@@ -14,32 +14,23 @@ const VacationRequestsList = () => {
   useEffect(() => {
     const fetchUserAndRequests = async () => {
       if (currentUser) {
-        // Fetch the current user's name from the 'users' collection
         const userRef = doc(db, "users", currentUser.uid);
         const userSnap = await getDoc(userRef);
         if (userSnap.exists()) {
           const userName = userSnap.data().name;
-          
-          // Calculate the date 2 weeks ago from today
           const twoWeeksAgo = subWeeks(new Date(), 2);
-          
           const q = query(collection(db, "vacationRequests"), where("customerName", "==", userName));
           const querySnapshot = await getDocs(q);
           const fetchedRequests = querySnapshot.docs
-            .map(doc => ({ id: doc.id, ...doc.data() }))
-            .filter(request => {
-              // Convert startDate string to Date object and compare
-              const startDate = parseISO(request.startDate);
-              return startDate >= twoWeeksAgo;
-            });
-            
+            .map(doc => {
+              const data = doc.data();
+              return { ...data, id: doc.id, startDate: parseISO(data.startDate), endDate: parseISO(data.endDate) };
+            })
+            .filter(request => request.startDate >= twoWeeksAgo);
           setRequests(fetchedRequests);
-        } else {
-          console.log("User document not found");
         }
       }
     };
-
     fetchUserAndRequests();
   }, [currentUser]);
 
@@ -76,8 +67,9 @@ const VacationRequestsList = () => {
           <Tbody>
             {requests.map((request) => (
               <Tr key={request.id}>
-                <Td>{request.startDate}</Td>
-                <Td>{request.endDate}</Td>
+                {/* Ensure dates are formatted correctly */}
+                <Td>{format(new Date(request.startDate), 'dd/MM/yyyy')}</Td>
+                <Td>{format(new Date(request.endDate), 'dd/MM/yyyy')}</Td>
                 <Td>
                   <Box as="span" p={1} bg={getStatusBgColor(request.status)} borderRadius="md">
                     {request.status}
@@ -103,8 +95,9 @@ const VacationRequestsList = () => {
             {selectedRequest && (
               <>
                 <Text>Nom: {selectedRequest.customerName}</Text>
-                <Text>Date de début: {selectedRequest.startDate}</Text>
-                <Text>Date de fin: {selectedRequest.endDate}</Text>
+                {/* Ensure selectedRequest dates are formatted correctly */}
+                <Text>Date de début: {format(new Date(selectedRequest.startDate), 'dd/MM/yyyy')}</Text>
+                <Text>Date de fin: {format(new Date(selectedRequest.endDate), 'dd/MM/yyyy')}</Text>
                 <Text>Solde congés payés (jours ouvrés): {selectedRequest.paidLeaveBalance}</Text>
                 <Text>Type de congé: {selectedRequest.paidLeave ? "Congés Payés" : (selectedRequest.unpaidLeave ? "Sans solde" : "Autres")}</Text>
                 <Text>Autres informations: {selectedRequest.otherLeave}</Text>
