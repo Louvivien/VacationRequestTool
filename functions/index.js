@@ -84,3 +84,55 @@ exports.sendVacationRequestEmail = functions.firestore
         console.error("Error sending email to admin", error);
       }
     });
+
+
+exports.sendStatusChangeEmail = functions.firestore
+    .document("vacationRequests/{requestId}")
+    .onUpdate(async (change, context) => {
+      const before = change.before.data();
+      const after = change.after.data();
+
+      // Proceed only if status changes to "accepté" or "refusé" from "en attente"
+      if (before.status === "en attente" && (after.status === "accepté" || after.status === "refusé")) {
+        // Fetch user's email using employeeNumber
+        const usersRef = admin.firestore().collection("users");
+        const snapshot = await usersRef.where("employeeNumber", "==", after.employeeNumber).get();
+
+        if (snapshot.empty) {
+          console.log("No matching user found for employeeNumber:", after.employeeNumber);
+          return;
+        }
+
+        // Assuming there's only one user with a matching employeeNumber
+        const userDoc = snapshot.docs[0].data();
+        const userEmail = userDoc.email;
+        const userName = after.customerName; // Or userDoc.name if you prefer the name from users collection
+        let subject; let htmlContent;
+
+        if (after.status === "accepté") {
+          subject = "Demande de congés acceptée";
+          htmlContent = `<strong>Bonjour ${userName},</strong><br><br>Votre demande de congés a été acceptée.<br><br>Cordialement,`;
+        } else if (after.status === "refusé") {
+          subject = "Demande de congés refusée";
+          htmlContent = `<strong>Bonjour ${userName},</strong><br><br>Votre demande de congés a été refusée.<br><br>Cordialement,`;
+        }
+
+        const msg = {
+          to: userEmail, // User's email fetched from users collection
+          from: "vivien.richaud@gmail.com", // Use a verified sender email address
+          subject: subject,
+          html: htmlContent,
+        };
+
+        try {
+          await sgMail.send(msg);
+          console.log("Email sent to", userEmail);
+        } catch (error) {
+          console.error("Error sending email:", error);
+        }
+      }
+    });
+
+
+// firebase deploy --only functions
+// npx eslint . --fix
