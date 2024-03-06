@@ -1,17 +1,15 @@
-// /Users/vivien/Documents/Entreprisedufutur/src/components/VacationRequestsList.jsx
-
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
 import { query, collection, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
 import { useAuth } from '../contexts/AuthContext';
+import { subWeeks, parseISO } from 'date-fns';
 
 const VacationRequestsList = () => {
   const { currentUser } = useAuth();
   const [requests, setRequests] = useState([]);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedRequest, setSelectedRequest] = useState(null);
-
 
   useEffect(() => {
     const fetchUserAndRequests = async () => {
@@ -22,13 +20,19 @@ const VacationRequestsList = () => {
         if (userSnap.exists()) {
           const userName = userSnap.data().name;
           
-          // Use the fetched name to query the 'vacationRequests' collection
+          // Calculate the date 2 weeks ago from today
+          const twoWeeksAgo = subWeeks(new Date(), 2);
+          
           const q = query(collection(db, "vacationRequests"), where("customerName", "==", userName));
           const querySnapshot = await getDocs(q);
-          const fetchedRequests = [];
-          querySnapshot.forEach((doc) => {
-            fetchedRequests.push({ id: doc.id, ...doc.data() });
-          });
+          const fetchedRequests = querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(request => {
+              // Convert startDate string to Date object and compare
+              const startDate = parseISO(request.startDate);
+              return startDate >= twoWeeksAgo;
+            });
+            
           setRequests(fetchedRequests);
         } else {
           console.log("User document not found");
@@ -39,25 +43,23 @@ const VacationRequestsList = () => {
     fetchUserAndRequests();
   }, [currentUser]);
 
-
   const handleOpenModal = (request) => {
     setSelectedRequest(request);
     onOpen();
   };
 
-    // Function to determine the background color based on the request status
-    const getStatusBgColor = (status) => {
-      switch (status) {
-        case "en attente":
-          return "gray.200"; // Grey
-        case "accepté":
-          return "green.100"; // Light green
-        case "refusé":
-          return "red.100"; // Light red
-        default:
-          return "transparent";
-      }
-    };
+  const getStatusBgColor = (status) => {
+    switch (status) {
+      case "en attente":
+        return "gray.200";
+      case "accepté":
+        return "green.100";
+      case "refusé":
+        return "red.100";
+      default:
+        return "transparent";
+    }
+  };
 
   return (
     <>
@@ -95,7 +97,7 @@ const VacationRequestsList = () => {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Details de la Demande</ModalHeader>
+          <ModalHeader>Détails de la Demande</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             {selectedRequest && (
@@ -112,7 +114,6 @@ const VacationRequestsList = () => {
           </ModalBody>
         </ModalContent>
       </Modal>
-
     </>
   );
 };
