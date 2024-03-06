@@ -16,7 +16,6 @@ const VacationRequestForm = () => {
 
   const [request, setRequest] = useState({
     customerName: initialCustomerName,
-    paidLeaveBalance: '',
     startDate: '',
     endDate: '',
     totalDays: '',
@@ -66,7 +65,6 @@ const VacationRequestForm = () => {
       alert('Demande de congés envoyée avec succès!');
       setRequest({
         customerName: initialCustomerName,
-        paidLeaveBalance: '',
         startDate: '',
         endDate: '',
         totalDays: '',
@@ -90,12 +88,6 @@ const VacationRequestForm = () => {
         placeholder="Nom du client"
       />
 
-      <Input
-        type="number"
-        value={request.paidLeaveBalance}
-        onChange={(e) => setRequest({ ...request, paidLeaveBalance: e.target.value })}
-        placeholder="Solde congés payés (jours ouvrés)"
-      />
 
       <h3>Dates des congés demandés :</h3>
       <Text>Date de début (au matin) :</Text>
