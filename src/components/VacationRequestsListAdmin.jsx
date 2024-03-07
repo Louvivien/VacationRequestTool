@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../utils/init-firebase';
 import { query, collection, getDocs, doc, updateDoc, orderBy } from 'firebase/firestore';
-import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalCloseButton, ModalBody, Box } from '@chakra-ui/react';
+import { Table, Thead, Tbody, Tr, Th, Td, Button, Text, useDisclosure, Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalCloseButton, ModalBody, Box, Icon } from '@chakra-ui/react';
+import { FaCalendarAlt } from 'react-icons/fa';
 import { format } from 'date-fns';
 
 const VacationRequestsListAdmin = () => {
@@ -12,8 +13,7 @@ const VacationRequestsListAdmin = () => {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        // Query that includes orderBy to sort by startDate
-        const q = query(collection(db, "vacationRequests"), orderBy("startDate", "asc"));
+        const q = query(collection(db, "vacationRequests"), orderBy("startDate"));
         const querySnapshot = await getDocs(q);
         const fetchedRequests = [];
         querySnapshot.forEach((doc) => {
@@ -24,13 +24,16 @@ const VacationRequestsListAdmin = () => {
         console.error("Error fetching requests: ", error);
       }
     };
-    
+
     fetchRequests();
   }, []);
 
   const updateRequestStatus = async (id, newStatus) => {
     const requestRef = doc(db, "vacationRequests", id);
-    await updateDoc(requestRef, { status: newStatus });
+    await updateDoc(requestRef, {
+      status: newStatus
+    });
+    // Update UI after status change
     setRequests(requests.map(request => request.id === id ? { ...request, status: newStatus } : request));
     onClose(); // Close the modal after updating
   };
@@ -40,6 +43,7 @@ const VacationRequestsListAdmin = () => {
     onOpen();
   };
 
+  // Function to determine the background color based on the request status
   const getStatusBgColor = (status) => {
     switch (status) {
       case "en attente":
@@ -53,6 +57,35 @@ const VacationRequestsListAdmin = () => {
     }
   };
 
+  // Function to generate an .ics file with the request details
+  const generateIcsFile = (request) => {
+    const startDate = format(new Date(request.startDate), 'yyyyMMdd');
+    const endDate = format(new Date(request.endDate), 'yyyyMMdd');
+    const summary = `Congé de ${request.customerName}`;
+    const description = `Type de congé: ${request.paidLeave ? "Congés Payés" : (request.unpaidLeave ? "Sans solde" : "Autres")}
+Autres informations: ${request.otherLeave}`;
+
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//hacksw/handcal//NONSGML v1.0//EN
+BEGIN:VEVENT
+DTSTART:${startDate}
+DTEND:${endDate}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `${summary}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <>
       {requests.length > 0 ? (
@@ -64,6 +97,7 @@ const VacationRequestsListAdmin = () => {
               <Th>Date de fin</Th>
               <Th>Statut</Th>
               <Th>Actions</Th>
+              <Th>Calendrier</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -79,6 +113,9 @@ const VacationRequestsListAdmin = () => {
                 </Td>
                 <Td>
                   <Button colorScheme='blue' onClick={() => handleOpenModal(request)}>Détails</Button>
+                </Td>
+                <Td>
+                  <Icon as={FaCalendarAlt} boxSize={6} cursor="pointer" onClick={() => generateIcsFile(request)} />
                 </Td>
               </Tr>
             ))}
@@ -107,8 +144,12 @@ const VacationRequestsListAdmin = () => {
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="green" mr={3} onClick={() => updateRequestStatus(selectedRequest.id, "accepté")}>Accepter</Button>
-            <Button colorScheme="red" onClick={() => updateRequestStatus(selectedRequest.id, "refusé")}>Refuser</Button>
+            <Button colorScheme="green" mr={3} onClick={() => updateRequestStatus(selectedRequest.id, "accepté")}>
+              Accepter
+            </Button>
+            <Button colorScheme="red" onClick={() => updateRequestStatus(selectedRequest.id, "refusé")}>
+              Refuser
+            </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
