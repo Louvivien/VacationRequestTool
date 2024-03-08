@@ -161,17 +161,39 @@ const UserManagement = () => {
     setFormMode('add');
   };
 
-
   const addUsersFromCSV = async () => {
     const lines = csvData.trim().split('\n');
-    const headers = lines[0].split(';');
+    if (lines.length === 0) {
+      toast({
+        title: "Erreur de chargement CSV",
+        description: "Le fichier CSV est vide.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
   
-    const emailIndex = headers.indexOf('E-mail');
-    const employeeNumberIndex = headers.indexOf('Nº salarié');
-    const managerEmployeeNumberIndex = headers.indexOf('Cadre dirigeant'); // Ensure this matches your CSV header for manager employee number
-    const nameIndex = headers.indexOf('Nom');
-    const firstNameIndex = headers.indexOf('Prénom');
-    const roleIndex = headers.indexOf('Role');
+    const headers = lines[0].split(';');
+    // Define the expected headers
+    const expectedHeaders = [
+      "Nº salarié", "Nom", "Prénom", "Code salarié", "Cadre Dirigeant", "Equipe", 
+      "Service", "Agence", "Cadre dirigeant", "E-mail", "Secteur Cial", "Role"
+    ];
+  
+    // Check if the headers match the expected headers
+    const isValidFormat = expectedHeaders.every((header, index) => headers[index] === header);
+  
+    if (!isValidFormat) {
+      toast({
+        title: "Erreur de format CSV",
+        description: "Le format du fichier CSV est invalide. Assurez-vous d'utiliser le format correct: " + expectedHeaders.join("; "),
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+      return; // Stop execution if the format is invalid
+    }
   
     // Prepare an array to batch add user creation requests
     const userCreationRequests = [];
@@ -179,13 +201,14 @@ const UserManagement = () => {
     for (let i = 1; i < lines.length; i++) {
       const fields = lines[i].split(';');
   
-      const email = fields[emailIndex];
-      const employeeNumber = fields[employeeNumberIndex];
-      const managerEmployeeNumber = fields[managerEmployeeNumberIndex];
-      const firstName = fields[firstNameIndex].trim();
-      const lastName = fields[nameIndex].trim();
+      // Extracting fields based on expected headers
+      const email = fields[headers.indexOf('E-mail')];
+      const employeeNumber = fields[headers.indexOf('Nº salarié')];
+      const managerEmployeeNumber = fields[headers.indexOf('Cadre dirigeant')];
+      const firstName = fields[headers.indexOf('Prénom')].trim();
+      const lastName = fields[headers.indexOf('Nom')].trim();
       const name = `${firstName} ${lastName}`; // Correctly combining first name and last name
-      const roleRaw = fields[roleIndex].trim().toUpperCase(); // Ensure case-insensitive comparison
+      const roleRaw = fields[headers.indexOf('Role')].trim().toUpperCase(); // Ensure case-insensitive comparison
       const role = roleRaw === 'UTILISATEUR' ? 'user' : (roleRaw === 'MANAGER' ? 'manager' : 'user'); // Default to 'user' if not matching
   
       const userData = {
@@ -227,7 +250,7 @@ const UserManagement = () => {
       });
     }
   
-    setCsvData('');
+    setCsvData(''); // Clear the CSV data after processing
   };
   
   
