@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { db, auth } from '../utils/init-firebase';
-import { collection, getDocs, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { db } from '../utils/init-firebase';
+import { collection, updateDoc, doc, setDoc, addDoc, onSnapshot } from 'firebase/firestore';
 import { Container, useToast } from '@chakra-ui/react';
 import UserList from './UserList';
 import UserForm from './UserForm';
@@ -23,59 +22,69 @@ const UserManagement = () => {
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    fetchUsers();
+    // Set up a real-time listener for the users collection
+    const unsubscribe = onSnapshot(collection(db, "users"), (querySnapshot) => {
+      const fetchedUsers = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setUsers(fetchedUsers);
+    });
+
+    // Cleanup subscription on component unmount
+    return () => unsubscribe();
   }, []);
 
-  const fetchUsers = async () => {
-    const querySnapshot = await getDocs(collection(db, "users"));
-    const fetchedUsers = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setUsers(fetchedUsers);
-  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    try {
-      if (formMode === 'add') {
-        // Create the user with Firebase Authentication
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const userId = userCredential.user.uid;
-        console.log('User created with ID:', userId);
+    if (formMode === 'add') {
+      // Prepare the user data for the Firestore collection
+      const userCreationRequest = {
+        email,
+        password, // Note: Be cautious with storing passwords in Firestore
+        employeeNumber,
+        managerEmployeeNumber,
+        name,
+        role,
+        formSubmission: true // Indicate this user is created through the form submission
+      };
   
-        // Store the user data in Firestore with formSubmission flag for new users
-        const userData = {
-          email,
-          employeeNumber,
-          managerEmployeeNumber,
-          name,
-          role,
-          formSubmission: true // Indicate this user is created through the form submission
-        };
-        console.log('User data to be saved:', userData);
-        await setDoc(doc(db, "users", userId), userData);
-        console.log('User data saved in Firestore for user:', userId);
+      try {
+        // Add a document to `userCreationRequests` collection instead of creating the user directly
+        await addDoc(collection(db, "userCreationRequests"), userCreationRequest);
+        console.log('User creation request added');
   
         toast({
-          title: "Utilisateur ajouté",
-          description: "L'utilisateur a été ajouté avec succès.",
+          title: "Demande de création d'utilisateur ajoutée",
+          description: "La demande de création de l'utilisateur a été ajoutée avec succès.",
           status: "success",
           duration: 5000,
           isClosable: true,
         });
-      } else if (formMode === 'edit' && currentUser) {
-        // Update the user data in Firestore with formSubmission flag for edited users
-        const userData = {
-          email,
-          employeeNumber,
-          managerEmployeeNumber,
-          name,
-          role,
-          formSubmission: true // Also indicate this for edited users to prevent Cloud Function interference
-        };
-        console.log('User data to be updated:', userData);
+      } catch (error) {
+        console.error('Error submitting user creation request:', error);
+        toast({
+          title: "Erreur",
+          description: `Erreur lors de l'ajout de la demande de création de l'utilisateur: ${error.message}`,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } else if (formMode === 'edit' && currentUser) {
+      // Handle user data update for edited users
+      const userData = {
+        email,
+        employeeNumber,
+        managerEmployeeNumber,
+        name,
+        role,
+        formSubmission: true // Also indicate this for edited users to prevent Cloud Function interference
+      };
+      try {
         await updateDoc(doc(db, "users", currentUser.id), userData);
         console.log('User data updated in Firestore for user:', currentUser.id);
   
@@ -86,20 +95,19 @@ const UserManagement = () => {
           duration: 5000,
           isClosable: true,
         });
+      } catch (error) {
+        console.error('Error updating user data:', error);
+        toast({
+          title: "Erreur",
+          description: `Erreur lors de la mise à jour de l'utilisateur: ${error.message}`,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       }
-    } catch (error) {
-      console.error('Error saving user data:', error);
-      toast({
-        title: "Erreur",
-        description: error.message,
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
     }
   
     resetForm();
-    fetchUsers();
   };
   
 
@@ -113,10 +121,34 @@ const UserManagement = () => {
     setFormMode('edit');
   };
 
+
   const handleDelete = async (userId) => {
-    await deleteDoc(doc(db, "users", userId));
-    fetchUsers();
+    try {
+      // Add a document to `userDeletionRequests` collection with the userId as the document ID
+      await setDoc(doc(db, "userDeletionRequests", userId), { timestamp: new Date() });
+      console.log(`Deletion request for user ${userId} added.`);
+      
+      toast({
+        title: "Demande de suppression envoyée",
+        description: "La demande de suppression de l'utilisateur a été envoyée avec succès.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error(`Error requesting deletion for user ${userId}:`, error);
+      toast({
+        title: "Erreur",
+        description: `Erreur lors de la demande de suppression de l'utilisateur: ${error.message}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
+  
+  
+  
 
   const resetForm = () => {
     setCurrentUser(null);
@@ -130,7 +162,6 @@ const UserManagement = () => {
   };
 
 
-  
   const addUsersFromCSV = async () => {
     const lines = csvData.trim().split('\n');
     const headers = lines[0].split(';');
@@ -141,6 +172,9 @@ const UserManagement = () => {
     const nameIndex = headers.indexOf('Nom');
     const firstNameIndex = headers.indexOf('Prénom');
     const roleIndex = headers.indexOf('Role');
+  
+    // Prepare an array to batch add user creation requests
+    const userCreationRequests = [];
   
     for (let i = 1; i < lines.length; i++) {
       const fields = lines[i].split(';');
@@ -156,46 +190,46 @@ const UserManagement = () => {
   
       const userData = {
         email,
+        password: 'temporary_password', // Consider security implications and handling
         employeeNumber,
         managerEmployeeNumber,
         name,
         role,
         csvImport: true // Indicate this user is imported from CSV
       };
-      
   
-      console.log(`Creating user from CSV data: ${JSON.stringify(userData)}`);
+      userCreationRequests.push(userData);
+    }
   
-      try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, 'temporary_password');
-        const userId = userCredential.user.uid;
-        console.log('User created with ID:', userId);
-  
-        await setDoc(doc(db, "users", userId), userData);
-        console.log('User data saved in Firestore for user:', userId);
-  
-        toast({
-          title: "Utilisateur ajouté",
-          description: `L'utilisateur ${name} a été ajouté avec succès.`,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-      } catch (error) {
-        console.error('Error saving user data:', error);
-        toast({
-          title: "Erreur",
-          description: `Erreur lors de l'ajout de l'utilisateur ${name}: ${error.message}`,
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
+    // Add user creation requests to Firestore
+    try {
+      const userCreationRequestsCollection = collection(db, "userCreationRequests");
+      for (const userData of userCreationRequests) {
+        await addDoc(userCreationRequestsCollection, userData);
       }
+      console.log('User creation requests added for CSV import');
+  
+      toast({
+        title: "Importation CSV",
+        description: "Les demandes de création d'utilisateur pour l'importation CSV ont été ajoutées avec succès.",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Error submitting user creation requests from CSV:', error);
+      toast({
+        title: "Erreur",
+        description: `Erreur lors de l'ajout des demandes de création d'utilisateur pour l'importation CSV: ${error.message}`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
     }
   
     setCsvData('');
-    fetchUsers();
   };
+  
   
  
 

@@ -4,30 +4,91 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 admin.initializeApp();
 
-exports.addUserRole = functions.auth.user().onCreate(async (user) => {
-  // Retrieve the user document to check if it's a form submission or CSV import
-  const userDoc = await admin.firestore().collection("users").doc(user.uid).get();
+// exports.addUserRole = functions.auth.user().onCreate(async (user) => {
+//   // Retrieve the user document to check if it's a form submission or CSV import
+//   const userDoc = await admin.firestore().collection("users").doc(user.uid).get();
 
-  if (userDoc.exists && (userDoc.data().csvImport || userDoc.data().formSubmission)) {
-    // Skip setting default values for users created through CSV import or form submission
-    return null;
-  }
+//   if (userDoc.exists && (userDoc.data().csvImport || userDoc.data().formSubmission)) {
+//     // Skip setting default values for users created through CSV import or form submission
+//     return null;
+//   }
 
-  // Existing logic for setting default values
-  const defaultRole = "user";
-  const employeeNumber = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
-  const defaultManagerEmployeeNumber = "00";
+//   // Existing logic for setting default values
+//   const defaultRole = "user";
+//   const employeeNumber = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
+//   const defaultManagerEmployeeNumber = "00";
 
-  await admin.firestore().collection("users").doc(user.uid).set({
-    email: user.email,
-    role: defaultRole,
-    employeeNumber: employeeNumber.toString(),
-    managerEmployeeNumber: defaultManagerEmployeeNumber,
-  }, {merge: true});
+//   await admin.firestore().collection("users").doc(user.uid).set({
+//     email: user.email,
+//     role: defaultRole,
+//     employeeNumber: employeeNumber.toString(),
+//     managerEmployeeNumber: defaultManagerEmployeeNumber,
+//   }, {merge: true});
 
-  return null;
-});
+//   return null;
+// });
 
+exports.createUser = functions.firestore
+    .document("userCreationRequests/{docId}")
+    .onCreate(async (snap, context) => {
+      const newUser = snap.data();
+
+      try {
+        const userRecord = await admin.auth().createUser({
+          email: newUser.email,
+          password: newUser.password,
+          // You can add more attributes here if needed
+        });
+
+        // Optionally, store the user data in Firestore under 'users' collection
+        await admin.firestore().collection("users").doc(userRecord.uid).set({
+          email: newUser.email,
+          employeeNumber: newUser.employeeNumber,
+          managerEmployeeNumber: newUser.managerEmployeeNumber,
+          name: newUser.name,
+          role: newUser.role,
+          // Set any flags or additional data here
+        });
+
+        // Optionally, delete the request document if you don't need it anymore
+        await snap.ref.delete();
+
+        console.log("Successfully created new user:", userRecord.uid);
+      } catch (error) {
+        console.error("Error creating new user:", error);
+        // Handle errors, maybe update the document with an error message
+      }
+    });
+
+exports.deleteUser = functions.firestore
+    .document("userDeletionRequests/{userId}")
+    .onCreate(async (snap, context) => {
+      const {userId} = context.params;
+
+      try {
+        // Delete the user from Authentication
+        await admin.auth().deleteUser(userId);
+        console.log(`Successfully deleted user ${userId} from Authentication.`);
+
+        // Optionally, delete the user document from Firestore if it exists
+        const userDocRef = admin.firestore().collection("users").doc(userId);
+        const userDoc = await userDocRef.get();
+        if (userDoc.exists) {
+          await userDocRef.delete();
+          console.log(`Deleted user document for ${userId}.`);
+        }
+
+        // Optionally, delete the request document to clean up
+        await snap.ref.delete();
+        console.log(`Deleted user deletion request for ${userId}.`);
+
+        return null;
+      } catch (error) {
+        console.error(`Error deleting user ${userId}:`, error);
+        // Handle errors, maybe update the request document with an error message
+        return null;
+      }
+    });
 
 const sgMail = require("@sendgrid/mail");
 
@@ -136,5 +197,5 @@ exports.sendStatusChangeEmail = functions.firestore
 
 
 // firebase deploy --only functions
-// firebase deploy --only functions:addUserRole
+// firebase deploy --only functions:deleteUser
 // npx eslint . --fix
