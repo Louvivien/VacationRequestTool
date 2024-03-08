@@ -1,29 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../utils/init-firebase';
-import { collection, getDocs, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore'; // Ensure setDoc is imported
-import { createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase auth functions
-import { auth } from '../utils/init-firebase'; // Ensure you import your Firebase auth instance
-import {
-  Input,
-  Button,
-  Select,
-  FormControl,
-  FormLabel,
-  Container,
-  VStack,
-  HStack,
-  List,
-  ListItem,
-  IconButton,
-  useToast,
-} from '@chakra-ui/react';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { db, auth } from '../utils/init-firebase';
+import { collection, getDocs, updateDoc, deleteDoc, doc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { Container, useToast } from '@chakra-ui/react';
+import UserList from './UserList';
+import UserForm from './UserForm';
+import CSVImporter from './CSVImporter';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [formMode, setFormMode] = useState('add');
   const toast = useToast();
+  const [csvData, setCsvData] = useState('');
 
   // Form fields
   const [email, setEmail] = useState('');
@@ -31,6 +20,7 @@ const UserManagement = () => {
   const [managerEmployeeNumber, setManagerEmployeeNumber] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('user');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     fetchUsers();
@@ -48,22 +38,25 @@ const UserManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Immediately capture form data to ensure it's not affected by async operations
-    const capturedData = { 
-      email, 
-      employeeNumber, 
-      managerEmployeeNumber, 
-      name, 
-      role 
-    };
-  
     try {
       if (formMode === 'add') {
         // Create the user with Firebase Authentication
-        const userCredential = await createUserWithEmailAndPassword(auth, capturedData.email, "test123");
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userId = userCredential.user.uid;
+        console.log('User created with ID:', userId);
   
-        // Ensure capturedData is used here directly
-        await setDoc(doc(db, "users", userCredential.user.uid), capturedData);
+        // Store the user data in Firestore with formSubmission flag for new users
+        const userData = {
+          email,
+          employeeNumber,
+          managerEmployeeNumber,
+          name,
+          role,
+          formSubmission: true // Indicate this user is created through the form submission
+        };
+        console.log('User data to be saved:', userData);
+        await setDoc(doc(db, "users", userId), userData);
+        console.log('User data saved in Firestore for user:', userId);
   
         toast({
           title: "Utilisateur ajouté",
@@ -73,8 +66,18 @@ const UserManagement = () => {
           isClosable: true,
         });
       } else if (formMode === 'edit' && currentUser) {
-        // Use capturedData for consistency
-        await updateDoc(doc(db, "users", currentUser.id), capturedData);
+        // Update the user data in Firestore with formSubmission flag for edited users
+        const userData = {
+          email,
+          employeeNumber,
+          managerEmployeeNumber,
+          name,
+          role,
+          formSubmission: true // Also indicate this for edited users to prevent Cloud Function interference
+        };
+        console.log('User data to be updated:', userData);
+        await updateDoc(doc(db, "users", currentUser.id), userData);
+        console.log('User data updated in Firestore for user:', currentUser.id);
   
         toast({
           title: "Utilisateur mis à jour",
@@ -85,6 +88,7 @@ const UserManagement = () => {
         });
       }
     } catch (error) {
+      console.error('Error saving user data:', error);
       toast({
         title: "Erreur",
         description: error.message,
@@ -98,15 +102,13 @@ const UserManagement = () => {
     fetchUsers();
   };
   
-  
-  
 
   const handleEdit = (user) => {
     setCurrentUser(user);
     setEmail(user.email);
-    setEmployeeNumber(user.employeeNumber);
-    setManagerEmployeeNumber(user.managerEmployeeNumber);
-    setName(user.name);
+    setEmployeeNumber(user.employeeNumber || '');
+    setManagerEmployeeNumber(user.managerEmployeeNumber || '');
+    setName(user.name || '');
     setRole(user.role);
     setFormMode('edit');
   };
@@ -123,52 +125,101 @@ const UserManagement = () => {
     setManagerEmployeeNumber('');
     setName('');
     setRole('user');
+    setPassword('');
     setFormMode('add');
   };
 
+
+  
+  const addUsersFromCSV = async () => {
+    const lines = csvData.trim().split('\n');
+    const headers = lines[0].split(';');
+  
+    const emailIndex = headers.indexOf('E-mail');
+    const employeeNumberIndex = headers.indexOf('Nº salarié');
+    const managerEmployeeNumberIndex = headers.indexOf('Cadre dirigeant'); // Ensure this matches your CSV header for manager employee number
+    const nameIndex = headers.indexOf('Nom');
+    const firstNameIndex = headers.indexOf('Prénom');
+    const roleIndex = headers.indexOf('Role');
+  
+    for (let i = 1; i < lines.length; i++) {
+      const fields = lines[i].split(';');
+  
+      const email = fields[emailIndex];
+      const employeeNumber = fields[employeeNumberIndex];
+      const managerEmployeeNumber = fields[managerEmployeeNumberIndex];
+      const firstName = fields[firstNameIndex].trim();
+      const lastName = fields[nameIndex].trim();
+      const name = `${firstName} ${lastName}`; // Correctly combining first name and last name
+      const roleRaw = fields[roleIndex].trim().toUpperCase(); // Ensure case-insensitive comparison
+      const role = roleRaw === 'UTILISATEUR' ? 'user' : (roleRaw === 'MANAGER' ? 'manager' : 'user'); // Default to 'user' if not matching
+  
+      const userData = {
+        email,
+        employeeNumber,
+        managerEmployeeNumber,
+        name,
+        role,
+        csvImport: true // Indicate this user is imported from CSV
+      };
+      
+  
+      console.log(`Creating user from CSV data: ${JSON.stringify(userData)}`);
+  
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, 'temporary_password');
+        const userId = userCredential.user.uid;
+        console.log('User created with ID:', userId);
+  
+        await setDoc(doc(db, "users", userId), userData);
+        console.log('User data saved in Firestore for user:', userId);
+  
+        toast({
+          title: "Utilisateur ajouté",
+          description: `L'utilisateur ${name} a été ajouté avec succès.`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } catch (error) {
+        console.error('Error saving user data:', error);
+        toast({
+          title: "Erreur",
+          description: `Erreur lors de l'ajout de l'utilisateur ${name}: ${error.message}`,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    }
+  
+    setCsvData('');
+    fetchUsers();
+  };
+  
+ 
+
   return (
     <Container maxW="container.xl">
-      <VStack as="form" onSubmit={handleSubmit} spacing={4} p={4} borderWidth="1px" borderRadius="lg">
-        <FormControl isRequired>
-          <FormLabel>Nom</FormLabel>
-          <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Nom" />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel>Email</FormLabel>
-          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel>Numéro d'employé</FormLabel>
-          <Input type="text" value={employeeNumber} onChange={(e) => setEmployeeNumber(e.target.value)} placeholder="Numéro d'employé" />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Numéro manager</FormLabel>
-          <Input type="text" value={managerEmployeeNumber} onChange={(e) => setManagerEmployeeNumber(e.target.value)} placeholder="Numéro manager" />
-        </FormControl>
-        <FormControl isRequired>
-          <FormLabel>Rôle</FormLabel>
-          <Select value={role} onChange={(e) => setRole(e.target.value)}>
-            <option value="user">Utilisateur</option>
-            <option value="admin">Administrateur</option>
-            <option value="manager">Manager</option>
-          </Select>
-        </FormControl>
-        <Button type="submit" colorScheme={formMode === 'add' ? "blue" : "orange"}>
-          {formMode === 'add' ? 'Ajouter' : 'Mettre à jour'}
-        </Button>
-        {formMode === 'edit' && <Button onClick={resetForm} colorScheme="gray">Annuler</Button>}
-      </VStack>
-      <List spacing={3} my={4}>
-        {users.map((user) => (
-          <ListItem key={user.id} d="flex" justifyContent="space-between" alignItems="center">
-            {`${user.name} (${user.email}) - ${user.role}`}
-            <HStack>
-              <IconButton icon={<FaEdit />} aria-label="Edit" onClick={() => handleEdit(user)} colorScheme="yellow" />
-              <IconButton icon={<FaTrash />} aria-label="Delete" onClick={() => handleDelete(user.id)} colorScheme="red" />
-            </HStack>
-          </ListItem>
-        ))}
-      </List>
+      <CSVImporter csvData={csvData} setCsvData={setCsvData} addUsersFromCSV={addUsersFromCSV} />
+      <UserForm
+        formMode={formMode}
+        email={email}
+        setEmail={setEmail}
+        employeeNumber={employeeNumber}
+        setEmployeeNumber={setEmployeeNumber}
+        managerEmployeeNumber={managerEmployeeNumber}
+        setManagerEmployeeNumber={setManagerEmployeeNumber}
+        name={name}
+        setName={setName}
+        role={role}
+        setRole={setRole}
+        password={password}
+        setPassword={setPassword}
+        handleSubmit={handleSubmit}
+        resetForm={resetForm}
+      />
+      <UserList users={users} handleEdit={handleEdit} handleDelete={handleDelete} />
     </Container>
   );
 };

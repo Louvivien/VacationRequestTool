@@ -5,26 +5,27 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 exports.addUserRole = functions.auth.user().onCreate(async (user) => {
-  // Set a default role
+  // Retrieve the user document to check if it's a form submission or CSV import
+  const userDoc = await admin.firestore().collection("users").doc(user.uid).get();
+
+  if (userDoc.exists && (userDoc.data().csvImport || userDoc.data().formSubmission)) {
+    // Skip setting default values for users created through CSV import or form submission
+    return null;
+  }
+
+  // Existing logic for setting default values
   const defaultRole = "user";
-
-  // Generate a unique 3-digit employee number
-  // Note: This simplistic approach generates a number between 100 and 999
-  // and may not guarantee absolute uniqueness or scale well for a large number of users.
   const employeeNumber = Math.floor(Math.random() * (999 - 100 + 1)) + 100;
-
-  // Default manager employee number set to "00"
   const defaultManagerEmployeeNumber = "00";
 
-  // Add a document to the 'users' collection with the user's UID
   await admin.firestore().collection("users").doc(user.uid).set({
     email: user.email,
     role: defaultRole,
-    employeeNumber: employeeNumber.toString(), // Store as string to preserve leading zeros
+    employeeNumber: employeeNumber.toString(),
     managerEmployeeNumber: defaultManagerEmployeeNumber,
-  });
+  }, {merge: true});
 
-  return null; // Cloud Functions expect null or a promise for non-HTTP functions
+  return null;
 });
 
 
@@ -135,4 +136,5 @@ exports.sendStatusChangeEmail = functions.firestore
 
 
 // firebase deploy --only functions
+// firebase deploy --only functions:addUserRole
 // npx eslint . --fix
