@@ -40,6 +40,9 @@ const UserMenu = () => {
         {userRole === 'admin' && (
           <MenuItem as={Link} to="/users">Gestion des utilisateurs</MenuItem>
         )}
+        {userRole === 'admin' && (
+          <MenuItem as={Link} to="/organizational">Organigramme</MenuItem>
+        )}
         {currentUser?.displayName == null && (
           <MenuItem as={Link} to="/forgot-password">Mot de passe oublié</MenuItem>
         )}

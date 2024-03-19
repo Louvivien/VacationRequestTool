@@ -14,7 +14,7 @@ import NotfoundPage from '../pages/NotfoundPage'
 import Profilepage from '../pages/Profilepage'
 import Registerpage from '../pages/Registerpage'
 import ResetPasswordPage from '../pages/ResetPasswordPage'
-import TestPage from '../pages/TestPage'
+import OrganizationalPage from '../pages/OrganizationalPage'
 import OrderPage from '../pages/OrderPage';
 import UsersPage from '../pages/UsersPage';
 import CalendarPage from '../pages/CalendarPage';
@@ -31,7 +31,7 @@ export default function AppRouter(props) {
           <ProtectedRoute exact path='/login' component={Loginpage} />
           <ProtectedRoute exact path='/register' component={Registerpage} />
           <ProtectedRoute exact path='/profile' component={Profilepage} />
-          <ProtectedRoute exact path='/test' component={TestPage} />
+          <ProtectedRoute exact path='/organizational' component={OrganizationalPage} />
           <ProtectedRoute exact path='/order' component={OrderPage} />
           <ProtectedRoute exact path='/calendar' component={CalendarPage} />
           <ProtectedRoute exact path='/orders' component={CustomerOrdersPage} />
