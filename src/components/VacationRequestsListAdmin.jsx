@@ -33,7 +33,6 @@ const VacationRequestsListAdmin = () => {
     await updateDoc(requestRef, {
       status: newStatus
     });
-    // Update UI after status change
     setRequests(requests.map(request => request.id === id ? { ...request, status: newStatus } : request));
     onClose(); // Close the modal after updating
   };
@@ -43,27 +42,25 @@ const VacationRequestsListAdmin = () => {
     onOpen();
   };
 
-  // Function to determine the background color based on the request status
   const getStatusBgColor = (status) => {
     switch (status) {
       case "en attente":
-        return "gray.200"; // Grey
+        return "gray.200";
       case "accepté":
-        return "green.100"; // Light green
+        return "green.100";
       case "refusé":
-        return "red.100"; // Light red
+        return "red.100";
       default:
         return "transparent";
     }
   };
 
-  // Function to generate an .ics file with the request details
   const generateIcsFile = (request) => {
     const startDate = format(new Date(request.startDate), 'yyyyMMdd');
     const endDate = format(new Date(request.endDate), 'yyyyMMdd');
     const summary = `Congé de ${request.customerName}`;
-    const description = `Type de congé: ${request.paidLeave ? "Congés Payés" : (request.unpaidLeave ? "Sans solde" : "Autres")}
-Autres informations: ${request.otherLeave}`;
+    let description = `Type de congé: ${getLeaveTypeDescription(request)}`;
+    description += `\nAutres informations: ${request.otherLeave || "N/A"}`;
 
     const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
@@ -72,7 +69,7 @@ BEGIN:VEVENT
 DTSTART:${startDate}
 DTEND:${endDate}
 SUMMARY:${summary}
-DESCRIPTION:${description}
+DESCRIPTION:${description.replace(/\n/g, "\\n")}
 END:VEVENT
 END:VCALENDAR`;
 
@@ -84,6 +81,19 @@ END:VCALENDAR`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const getLeaveTypeDescription = (request) => {
+    const types = [];
+    if (request.paidLeave) types.push("Congés Payés");
+    if (request.unpaidLeave) types.push("Sans solde");
+    if (request.nonWorkingDay) types.push("Jour non travaillé");
+    if (request.training) types.push("Formation");
+    if (request.sickness) types.push("Maladie");
+    if (request.medicalVisit) types.push("Visite médicale");
+    if (request.unjustifiedAbsence) types.push("Absence non justifiée");
+    if (request.specialLeave) types.push("Congé spécial");
+    return types.join(", ") || "Autres";
   };
 
   return (
@@ -136,20 +146,15 @@ END:VCALENDAR`;
                 <Text>Nom: {selectedRequest.customerName}</Text>
                 <Text>Date de début: {format(new Date(selectedRequest.startDate), 'dd/MM/yyyy')}</Text>
                 <Text>Date de fin: {format(new Date(selectedRequest.endDate), 'dd/MM/yyyy')}</Text>
-                <Text>Solde congés payés (jours ouvrés): {selectedRequest.paidLeaveBalance}</Text>
-                <Text>Type de congé: {selectedRequest.paidLeave ? "Congés Payés" : (selectedRequest.unpaidLeave ? "Sans solde" : "Autres")}</Text>
-                <Text>Statut: {selectedRequest.status}</Text>
-                <Text>Autres informations: {selectedRequest.otherLeave}</Text>
+                <Text>Nombre jours ouvrés: {selectedRequest.totalDays || "N/A"}</Text>
+                <Text>Type de congé: {getLeaveTypeDescription(selectedRequest)}</Text>
+                <Text>Autres informations: {selectedRequest.otherLeave || "N/A"}</Text>
               </>
             )}
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="green" mr={3} onClick={() => updateRequestStatus(selectedRequest.id, "accepté")}>
-              Accepter
-            </Button>
-            <Button colorScheme="red" onClick={() => updateRequestStatus(selectedRequest.id, "refusé")}>
-              Refuser
-            </Button>
+            <Button colorScheme="green" mr={3} onClick={() => updateRequestStatus(selectedRequest.id, "accepté")}>Accepter</Button>
+            <Button colorScheme="red" onClick={() => updateRequestStatus(selectedRequest.id, "refusé")}>Refuser</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

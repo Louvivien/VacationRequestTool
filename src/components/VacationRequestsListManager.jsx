@@ -102,7 +102,7 @@ const VacationRequestsListManager = () => {
                 <Text>Nom: {selectedRequest.customerName}</Text>
                 <Text>Date de début: {format(new Date(selectedRequest.startDate), 'dd/MM/yyyy')}</Text>
                 <Text>Date de fin: {format(new Date(selectedRequest.endDate), 'dd/MM/yyyy')}</Text>
-                <Text>Solde congés payés (jours ouvrés): {selectedRequest.paidLeaveBalance}</Text>
+                <Text>Nombre jours ouvrés: {selectedRequest.totalDays || "N/A"}</Text>
                 <Text>Type de congé: {selectedRequest.paidLeave ? "Congés Payés" : (selectedRequest.unpaidLeave ? "Sans solde" : "Autres")}</Text>
                 <Text>Autres informations: {selectedRequest.otherLeave}</Text>
                 <Text>Statut: {selectedRequest.status}</Text>

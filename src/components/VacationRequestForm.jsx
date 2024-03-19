@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Input, Button, Checkbox, VStack, Text } from '@chakra-ui/react';
 
 const VacationRequestForm = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userRole } = useAuth(); // Assuming `userRole` is available from `useAuth`
   const initialCustomerName = currentUser?.displayName || currentUser?.email || '';
   const [userDetails, setUserDetails] = useState({
     employeeNumber: '',
@@ -22,30 +22,34 @@ const VacationRequestForm = () => {
     paidLeave: false,
     unpaidLeave: false,
     otherLeave: '',
-    status: 'en attente'
+    status: 'en attente',
+    // Additional fields for admin
+    nonWorkingDay: false,
+    training: false,
+    sickness: false,
+    medicalVisit: false,
+    unjustifiedAbsence: false,
+    specialLeave: false,
   });
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      if (currentUser) {
-        const userDocRef = doc(db, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
+    if (currentUser) {
+      const userDocRef = doc(db, "users", currentUser.uid);
+      getDoc(userDocRef).then(userDoc => {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUserDetails({
             employeeNumber: userData.employeeNumber,
             managerEmployeeNumber: userData.managerEmployeeNumber
           });
-          // Prioritize 'name', then 'displayName', then 'email'
+          // Update request with user details, if necessary
           setRequest(prevRequest => ({
             ...prevRequest,
             customerName: userData.name || userData.displayName || userData.email || initialCustomerName,
           }));
         }
-      }
-    };
-  
-    fetchUserDetails();
+      });
+    }
   }, [currentUser, initialCustomerName]);
   
 
@@ -130,6 +134,20 @@ const VacationRequestForm = () => {
         onChange={(e) => setRequest({ ...request, otherLeave: e.target.value })}
         placeholder="Autres"
       />
+
+      {/* Admin-specific fields, rendered based on the user role */}
+      {userRole === 'admin' && (
+        <VStack spacing={3}>
+          <Text fontWeight="bold">Options réservées à l'admin :</Text>
+          <Checkbox isChecked={request.nonWorkingDay} onChange={(e) => setRequest({...request, nonWorkingDay: e.target.checked})}>Jour non travaillé</Checkbox>
+          <Checkbox isChecked={request.training} onChange={(e) => setRequest({...request, training: e.target.checked})}>Formation</Checkbox>
+          <Checkbox isChecked={request.sickness} onChange={(e) => setRequest({...request, sickness: e.target.checked})}>Maladie</Checkbox>
+          <Checkbox isChecked={request.medicalVisit} onChange={(e) => setRequest({...request, medicalVisit: e.target.checked})}>Visite médicale</Checkbox>
+          <Checkbox isChecked={request.unjustifiedAbsence} onChange={(e) => setRequest({...request, unjustifiedAbsence: e.target.checked})}>Absence non justifiée</Checkbox>
+          <Checkbox isChecked={request.specialLeave} onChange={(e) => setRequest({...request, specialLeave: e.target.checked})}>Congé spécial</Checkbox>
+        </VStack>
+      )}
+
 
       <Button colorScheme="blue" onClick={handleSubmit}>
         Demander
