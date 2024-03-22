@@ -25,9 +25,9 @@ The admin can add or edit users, changing roles of any user profile information.
 
 Node version 16
 
-brew install node@16
+ `brew install node@16`
 
-export NODE_OPTIONS=--openssl-legacy-provider : this needs to be entered in the settings or the tool will not work make sure you have this
+`export NODE_OPTIONS=--openssl-legacy-provider `: this needs to be entered in the settings or the tool will not work make sure you have this
 
 
 ## Available Scripts
