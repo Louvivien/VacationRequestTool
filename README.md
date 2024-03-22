@@ -18,6 +18,7 @@ The admin can add or edit users, changing roles of any user profile information.
 - Notifications through Firebase Cloud functions
 - UI: ChakraUI with Dark Mode
 - User management system
+- Organizational chart
 
 
 ## Prerequisite
@@ -41,9 +42,23 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 _**Note**: Before running `npm start` do place the relevant environment variables in the `.env.local` file for firebase configuration._
 
 
+There are some Firebase Cloud functions in /functions, you will need to deploy it:
+
+## `cd functions`
+
+## `firebase login`
+
+## `firebase init functions`
+
+## `firebase deploy --only functions`
+
+if you have problems with eslint:
+## `npx eslint . --fix`
+
+
 ## Work in progress
 
-- User management system: for now when adding a new user the admin is deconnected and he needs to edit the user profile information afterwards. Ideally when adding a user all information about the new user profile must be saved immediatly and the admin must not be deconnected.  
+- Organizational chart
 
 
 
