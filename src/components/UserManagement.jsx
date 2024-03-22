@@ -20,6 +20,7 @@ const UserManagement = () => {
   const [name, setName] = useState('');
   const [role, setRole] = useState('user');
   const [password, setPassword] = useState('');
+  const [service, setService] = useState(''); // Add service state
 
   useEffect(() => {
     // Set up a real-time listener for the users collection
@@ -35,11 +36,9 @@ const UserManagement = () => {
     return () => unsubscribe();
   }, []);
 
-  
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (formMode === 'add') {
       // Prepare the user data for the Firestore collection
       const userCreationRequest = {
@@ -49,14 +48,15 @@ const UserManagement = () => {
         managerEmployeeNumber,
         name,
         role,
+        service, // Include the service field
         formSubmission: true // Indicate this user is created through the form submission
       };
-  
+
       try {
         // Add a document to `userCreationRequests` collection instead of creating the user directly
         await addDoc(collection(db, "userCreationRequests"), userCreationRequest);
         console.log('User creation request added');
-  
+
         toast({
           title: "Demande de création d'utilisateur ajoutée",
           description: "La demande de création de l'utilisateur a été ajoutée avec succès.",
@@ -82,12 +82,13 @@ const UserManagement = () => {
         managerEmployeeNumber,
         name,
         role,
+        service, // Include the service field
         formSubmission: true // Also indicate this for edited users to prevent Cloud Function interference
       };
       try {
         await updateDoc(doc(db, "users", currentUser.id), userData);
         console.log('User data updated in Firestore for user:', currentUser.id);
-  
+
         toast({
           title: "Utilisateur mis à jour",
           description: "L'utilisateur a été mis à jour avec succès.",
@@ -106,10 +107,9 @@ const UserManagement = () => {
         });
       }
     }
-  
+
     resetForm();
   };
-  
 
   const handleEdit = (user) => {
     setCurrentUser(user);
@@ -118,16 +118,16 @@ const UserManagement = () => {
     setManagerEmployeeNumber(user.managerEmployeeNumber || '');
     setName(user.name || '');
     setRole(user.role);
+    setService(user.service || ''); // Set the service field
     setFormMode('edit');
   };
-
 
   const handleDelete = async (userId) => {
     try {
       // Add a document to `userDeletionRequests` collection with the userId as the document ID
       await setDoc(doc(db, "userDeletionRequests", userId), { timestamp: new Date() });
       console.log(`Deletion request for user ${userId} added.`);
-      
+
       toast({
         title: "Demande de suppression envoyée",
         description: "La demande de suppression de l'utilisateur a été envoyée avec succès.",
@@ -146,9 +146,6 @@ const UserManagement = () => {
       });
     }
   };
-  
-  
-  
 
   const resetForm = () => {
     setCurrentUser(null);
@@ -158,6 +155,7 @@ const UserManagement = () => {
     setName('');
     setRole('user');
     setPassword('');
+    setService(''); // Reset the service field
     setFormMode('add');
   };
 
@@ -173,17 +171,17 @@ const UserManagement = () => {
       });
       return;
     }
-  
+
     const headers = lines[0].split(';');
     // Define the expected headers
     const expectedHeaders = [
-      "Nº salarié", "Nom", "Prénom", "Code salarié", "Cadre Dirigeant", "Equipe", 
+      "Nº salarié", "Nom", "Prénom", "Code salarié", "Cadre Dirigeant", "Equipe",
       "Service", "Agence", "Cadre dirigeant", "E-mail", "Secteur Cial", "Role"
     ];
-  
+
     // Check if the headers match the expected headers
     const isValidFormat = expectedHeaders.every((header, index) => headers[index] === header);
-  
+
     if (!isValidFormat) {
       toast({
         title: "Erreur de format CSV",
@@ -194,13 +192,13 @@ const UserManagement = () => {
       });
       return; // Stop execution if the format is invalid
     }
-  
+
     // Prepare an array to batch add user creation requests
     const userCreationRequests = [];
-  
+
     for (let i = 1; i < lines.length; i++) {
       const fields = lines[i].split(';');
-  
+
       // Extracting fields based on expected headers
       const email = fields[headers.indexOf('E-mail')];
       const employeeNumber = fields[headers.indexOf('Nº salarié')];
@@ -210,7 +208,8 @@ const UserManagement = () => {
       const name = `${firstName} ${lastName}`; // Correctly combining first name and last name
       const roleRaw = fields[headers.indexOf('Role')].trim().toUpperCase(); // Ensure case-insensitive comparison
       const role = roleRaw === 'UTILISATEUR' ? 'user' : (roleRaw === 'MANAGER' ? 'manager' : 'user'); // Default to 'user' if not matching
-  
+      const service = fields[headers.indexOf('Service')]; // Get the service field
+
       const userData = {
         email,
         password: 'temporary_password', // Consider security implications and handling
@@ -218,12 +217,13 @@ const UserManagement = () => {
         managerEmployeeNumber,
         name,
         role,
+        service, // Include the service field
         csvImport: true // Indicate this user is imported from CSV
       };
-  
+
       userCreationRequests.push(userData);
     }
-  
+
     // Add user creation requests to Firestore
     try {
       const userCreationRequestsCollection = collection(db, "userCreationRequests");
@@ -231,7 +231,7 @@ const UserManagement = () => {
         await addDoc(userCreationRequestsCollection, userData);
       }
       console.log('User creation requests added for CSV import');
-  
+
       toast({
         title: "Importation CSV",
         description: "Les demandes de création d'utilisateur pour l'importation CSV ont été ajoutées avec succès.",
@@ -249,12 +249,9 @@ const UserManagement = () => {
         isClosable: true,
       });
     }
-  
+
     setCsvData(''); // Clear the CSV data after processing
   };
-  
-  
- 
 
   return (
     <Container maxW="container.xl">
@@ -273,6 +270,8 @@ const UserManagement = () => {
         setRole={setRole}
         password={password}
         setPassword={setPassword}
+        service={service} // Add the service field
+        setService={setService} // Add the setService function
         handleSubmit={handleSubmit}
         resetForm={resetForm}
       />

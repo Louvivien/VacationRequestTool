@@ -99,16 +99,20 @@ const VacationRequestsList = () => {
             {selectedRequest && (
               <>
                 <Text>Nom: {selectedRequest.customerName}</Text>
-                {/* Ensure selectedRequest dates are formatted correctly */}
                 <Text>Date de début: {format(new Date(selectedRequest.startDate), 'dd/MM/yyyy')}</Text>
                 <Text>Date de fin: {format(new Date(selectedRequest.endDate), 'dd/MM/yyyy')}</Text>
                 <Text>Nombre jours ouvrés: {selectedRequest.totalDays || "N/A"}</Text>
-                <Text>Type de congé: {selectedRequest.paidLeave ? "Congés Payés" : (selectedRequest.unpaidLeave ? "Sans solde" : "Autres")}</Text>
-                <Text>Autres informations: {selectedRequest.otherLeave}</Text>
+                <Text>Type de congé: 
+                  {selectedRequest.otherAbsence ? " Autre absence" : 
+                    (selectedRequest.paidLeave ? " Congés Payés" : 
+                    (selectedRequest.unpaidLeave ? " Sans solde" : " Autres"))}
+                </Text>
+                <Text>Autres informations: {selectedRequest.otherLeave || "N/A"}</Text>
                 <Text>Statut: {selectedRequest.status}</Text>
               </>
             )}
           </ModalBody>
+
         </ModalContent>
       </Modal>
     </>

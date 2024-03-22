@@ -27,7 +27,6 @@ admin.initializeApp();
 
 //   return null;
 // });
-
 exports.createUser = functions.firestore
     .document("userCreationRequests/{docId}")
     .onCreate(async (snap, context) => {
@@ -37,7 +36,7 @@ exports.createUser = functions.firestore
         const userRecord = await admin.auth().createUser({
           email: newUser.email,
           password: newUser.password,
-          // You can add more attributes here if needed
+        // You can add more attributes here if needed
         });
 
         // Optionally, store the user data in Firestore under 'users' collection
@@ -47,7 +46,8 @@ exports.createUser = functions.firestore
           managerEmployeeNumber: newUser.managerEmployeeNumber,
           name: newUser.name,
           role: newUser.role,
-          // Set any flags or additional data here
+          service: newUser.service, // Add the service field here
+        // Set any flags or additional data here
         });
 
         // Optionally, delete the request document if you don't need it anymore
@@ -56,9 +56,10 @@ exports.createUser = functions.firestore
         console.log("Successfully created new user:", userRecord.uid);
       } catch (error) {
         console.error("Error creating new user:", error);
-        // Handle errors, maybe update the document with an error message
+      // Handle errors, maybe update the document with an error message
       }
     });
+
 
 exports.deleteUser = functions.firestore
     .document("userDeletionRequests/{userId}")

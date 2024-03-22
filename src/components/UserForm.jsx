@@ -1,7 +1,25 @@
 import React from 'react';
 import { Input, Button, Select, FormControl, FormLabel, VStack } from '@chakra-ui/react';
 
-const UserForm = ({ formMode, email, setEmail, employeeNumber, setEmployeeNumber, managerEmployeeNumber, setManagerEmployeeNumber, name, setName, role, setRole, password, setPassword, handleSubmit, resetForm }) => {
+const UserForm = ({
+  formMode,
+  email,
+  setEmail,
+  employeeNumber,
+  setEmployeeNumber,
+  managerEmployeeNumber,
+  setManagerEmployeeNumber,
+  name,
+  setName,
+  role,
+  setRole,
+  password,
+  setPassword,
+  service,
+  setService,
+  handleSubmit,
+  resetForm
+}) => {
   return (
     <VStack as="form" onSubmit={handleSubmit} spacing={4} p={4} borderWidth="1px" borderRadius="lg" mt={4}>
       <FormControl isRequired>
@@ -33,6 +51,10 @@ const UserForm = ({ formMode, email, setEmail, employeeNumber, setEmployeeNumber
           <option value="admin">Administrateur</option>
           <option value="manager">Manager</option>
         </Select>
+      </FormControl>
+      <FormControl isRequired>
+        <FormLabel>Service</FormLabel>
+        <Input type="text" value={service} onChange={(e) => setService(e.target.value)} placeholder="Service" />
       </FormControl>
       <Button type="submit" colorScheme={formMode === 'add' ? "blue" : "orange"}>
         {formMode === 'add' ? 'Ajouter' : 'Mettre à jour'}

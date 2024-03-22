@@ -21,6 +21,7 @@ const VacationRequestForm = () => {
     totalDays: '',
     paidLeave: false,
     unpaidLeave: false,
+    otherAbsence: false,
     otherLeave: '',
     status: 'en attente',
     // Additional fields for admin
@@ -127,6 +128,12 @@ const VacationRequestForm = () => {
         onChange={(e) => setRequest({ ...request, unpaidLeave: e.target.checked })}
       >
         Sans solde
+      </Checkbox>
+        <Checkbox
+        isChecked={request.otherAbsence} // New state for the "Autre absence" checkbox
+        onChange={(e) => setRequest({ ...request, otherAbsence: e.target.checked })}
+      >
+        Autre absence
       </Checkbox>
       <Input
         type="text"
