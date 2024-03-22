@@ -46,6 +46,8 @@ There are some Firebase Cloud functions in /functions, you will need to deploy i
 
  `cd functions`
 
+ ` npm install -g firebase-tools`
+
  `firebase login`
 
  `firebase init functions`
