@@ -44,16 +44,16 @@ _**Note**: Before running `npm start` do place the relevant environment variable
 
 There are some Firebase Cloud functions in /functions, you will need to deploy it:
 
-## `cd functions`
+ `cd functions`
 
-## `firebase login`
+ `firebase login`
 
-## `firebase init functions`
+ `firebase init functions`
 
-## `firebase deploy --only functions`
+ `firebase deploy --only functions`
 
 if you have problems with eslint:
-## `npx eslint . --fix`
+ `npx eslint . --fix`
 
 
 ## Work in progress
