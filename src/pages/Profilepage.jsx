@@ -52,6 +52,11 @@ export default function ProfilePage() {
               <Text fontWeight="bold">Numéro du manager :</Text>
               <Text>{userInfo.managerEmployeeNumber}</Text>
             </Box>
+            <Box>
+              <Text fontWeight="bold">Service :</Text>
+              <Text>{userInfo.service}</Text>
+            </Box>
+            
 
           </VStack>
         ) : (
